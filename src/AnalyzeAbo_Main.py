@@ -33,19 +33,28 @@ def usage():
 # Read Commandline Arguments.  Return true if everything looks okay for read extraction.
 def readArgs():
     # Default to None.  So I can easily check if they were not passed in.
-    global referenceFileName    
+    
+    # TODO: I should pass in an Exon 6 and Exon 7 reference.
+    # I don't need the A,B,O alleles, since I'm using logic to parse the phenotype from the allele name
+    
+    
+    global referenceFileName   
+    global readsFileName   
     global allelesFileName
-    global allelesAFileName
-    global allelesBFileName
-    global allelesOFileName
+    #global allelesAFileName
+    #global allelesBFileName
+    #global allelesOFileName
     global outputDirectoryName
+    global analysisType
 
     referenceFileName       = None
+    readsFileName           = None
     allelesFileName         = None
-    allelesAFileName        = None
-    allelesBFileName        = None
-    allelesOFileName        = None
+    #allelesAFileName        = None
+    #allelesBFileName        = None
+    #allelesOFileName        = None
     outputDirectoryName     = None
+    analysisType            = None
 
     if(len(sys.argv) < 3):
         print ('I don\'t think you have enough arguments.\n')
@@ -58,8 +67,9 @@ def readArgs():
     # https://www.tutorialspoint.com/python/python_command_line_arguments.htm
     try:
         opts, args = getopt.getopt(sys.argv[1:]
-            ,"hvr:a:o:A:B:O:"
-            ,["help", "version", "reference=","alleles=","output=","alleles-a=","alleles-b=","alleles-o="])
+            # TODO Fix this, i don't accept abo alleles anymore
+            ,"hvr:R:a:o:A:B:O:t:"
+            ,["help", "version", "reference=", "reads=","alleles=","output=","alleles-a=","alleles-b=","alleles-o=","analysis-type="])
 
         for opt, arg in opts:
 
@@ -75,20 +85,26 @@ def readArgs():
             elif opt in ("-i", "--alleles"):
                 allelesFileName = arg
                 
-            elif opt in ("-i", "--reference"):
+            elif opt in ("-r", "--reference"):
                 referenceFileName = arg
+                
+            elif opt in ("-R", "--reads"):
+                readsFileName = arg
                 
             elif opt in ("-o", "--output"):
                 outputDirectoryName = arg
 
-            elif opt in ("-A", "--alleles-a"):
-                allelesAFileName = arg
+            #elif opt in ("-A", "--alleles-a"):
+            #    allelesAFileName = arg
                 
-            elif opt in ("-B", "--alleles-b"):
-                allelesBFileName = arg
+            #elif opt in ("-B", "--alleles-b"):
+            #    allelesBFileName = arg
                 
-            elif opt in ("-O", "--alleles-o"):
-                allelesOFileName = arg
+            #elif opt in ("-O", "--alleles-o"):
+            #    allelesOFileName = arg
+
+            elif opt in ("-t", "--analysis-type"):
+                analysisType = arg
 
             else:
                 print('Unknown commandline option: ' + opt)
@@ -101,6 +117,7 @@ def readArgs():
         return False
 
     print('Reference File:' + str(referenceFileName))
+    print('Reads File:' + str(readsFileName))
     print('Alleles File:' + str(allelesFileName))
     print('Output Directory:' + str(outputDirectoryName))
 
@@ -108,6 +125,8 @@ def readArgs():
     if(len(referenceFileName) < 4):
         print('referenceFileName is too short:' + str(referenceFileName))
         return False
+    # TODO: I don't feel like writing sanity checks rignt now.
+    
     
     #if(len(allelesFileName) < 4):
     #    print('allelesFileName is too short:' + str(allelesFileName))
@@ -129,8 +148,20 @@ if __name__=='__main__':
             
             print('Starting to Analyze ABO')
             
+            if(analysisType=="READS"):
+                
+                findPolymorphismsInReads(referenceFileName, readsFileName, outputDirectoryName)     
+            
+            
+            elif(analysisType=="ALLELES"):
             #compareIndividualABOAllelesToReference(referenceFileName, allelesFileName, outputDirectoryName)
-            batchABOAllelesAgainstReference(referenceFileName, allelesFileName, outputDirectoryName)
+                batchABOAllelesAgainstReference(referenceFileName, allelesFileName, outputDirectoryName)
+            #findPolymorphismsInReads(referenceFileName, readsFileName, outputDirectoryName)
+            
+            else:
+                print ('Please provide an analysis type. Use the "-t" or "--analysis-type" with a type of "READS" or "ALLELES" ')
+                print ('I give up.')
+            
             
            
             print ('Done analyzing ABO.')    
