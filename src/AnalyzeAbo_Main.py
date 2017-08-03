@@ -68,8 +68,8 @@ def readArgs():
     try:
         opts, args = getopt.getopt(sys.argv[1:]
             # TODO Fix this, i don't accept abo alleles anymore
-            ,"hvr:R:a:o:A:B:O:t:"
-            ,["help", "version", "reference=", "reads=","alleles=","output=","alleles-a=","alleles-b=","alleles-o=","analysis-type="])
+            ,"hvr:R:a:o:A:B:O:t:e6:e7:"
+            ,["help", "version", "reference=", "reads=","alleles=","output=","alleles-a=","alleles-b=","alleles-o=","analysis-type=","exon-6=", "exon-7"])
 
         for opt, arg in opts:
 
@@ -93,6 +93,9 @@ def readArgs():
                 
             elif opt in ("-o", "--output"):
                 outputDirectoryName = arg
+                
+            elif opt in ("e6", "--exon-6"):
+                print ('YOU GAVE ME EXON 6:' + arg)
 
             #elif opt in ("-A", "--alleles-a"):
             #    allelesAFileName = arg
@@ -126,6 +129,13 @@ def readArgs():
         print('referenceFileName is too short:' + str(referenceFileName))
         return False
     # TODO: I don't feel like writing sanity checks rignt now.
+    
+    
+    # If we're doing allele analysis we need:
+        # fasta with alleles
+        # exon 6 and7 referencx
+    # If read analysis
+        # need ex 6 and 7.
     
     
     #if(len(allelesFileName) < 4):

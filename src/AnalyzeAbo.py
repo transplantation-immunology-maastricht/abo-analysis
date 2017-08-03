@@ -125,8 +125,6 @@ def analyzeReadAlignment(outputDirectory):#, totalReadCount):
     
     for pileupColumnIndex, pileupColumn in enumerate(pileupIterator):
         
-        
-        
         #referencePosition = pileupColumn.reference_pos
         referenceBase = alignmentRef[pileupColumn.reference_pos].upper()
         #alignedCount = pileupColumn.nsegments
@@ -155,8 +153,7 @@ def analyzeReadAlignment(outputDirectory):#, totalReadCount):
                 currentBase = pileupRead.alignment.query_sequence[queryPosition].upper()
                 currentColumnStats.insertBases(currentBase)
                 #myBloodGroupStats.processInsertion(bloodGroup, pileupColumnIndex, currentBase)
-                
-                
+                                
                 
             elif(queryPosition is not None):
             
