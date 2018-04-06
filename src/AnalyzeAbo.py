@@ -78,16 +78,17 @@ def alignSequencesAgainstReference(referenceLocation, alleleFileLocation, output
     try:
         # align | sam->bam | sort
         tempAlignmentName = join(alignmentSubdir,'alignment')
+        alignmentOutputName = tempAlignmentName + '.bam'
         bwaMemArgs = "-t 4 -x ont2d"
         cmd = ("bwa mem " + 
             bwaMemArgs + " " +  
             newReferenceLocation + " " +
             alleleFileLocation + 
-            " | samtools view  -Sb - | samtools sort - "
-            + tempAlignmentName)
+            " | samtools view  -Sb - | samtools sort -o "
+            + alignmentOutputName)
         #print ('alignment command:\n' + cmd)
         os.system(cmd)
-        alignmentOutputName = tempAlignmentName + '.bam'
+        
         
     except Exception:
         print ('Exception aligning reads against reference. Are bwa and samtools installed?')                  
@@ -283,11 +284,6 @@ def findReadPolymorphisms(outputDirectory, sequenceStats):
                 print ('I had an exception when trying to print the sequence surrounding an interesting ABO polymorphism.')
                 print ('I bet the reason is out of bounds, sequence is unknown.')
                 print ('I choose to just not respond right now.')                  
-
-               
-            
-
-
 
             #alignmentSummaryFile.write('\n')
             
