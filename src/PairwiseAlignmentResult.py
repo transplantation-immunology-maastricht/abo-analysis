@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from Bio import pairwise2
 
 class PairwiseAlignmentResult(): 
@@ -171,8 +173,3 @@ class PairwiseAlignmentResult():
         #else:
         #    raise Exception('I have a state that I do not know what to do with:' + str(state) + ',' + str(beginIndex) + ',' + str(endIndex))
             
-            
-        
-        
-     
-        

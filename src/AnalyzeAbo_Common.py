@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # This file is part of abo-analysis.
 #
 # abo-analysis is free software: you can redistribute it and/or modify

@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # This file is part of abo-analysis.
 #
 # abo-analysis is free software: you can redistribute it and/or modify
@@ -30,7 +32,7 @@ AlleleCutoffAgreementPercent = 95
 
 def findPolymorphismsInReads(referenceFileName, readsFileName, outputDirectoryName):
     
-    print ('Looking for polymorphisms in these reads:' + str(readsFileName))
+    print(('Looking for polymorphisms in these reads:' + str(readsFileName)))
     alignSequencesAgainstReference(referenceFileName, readsFileName, outputDirectoryName)
     sequenceStats = analyzeReadAlignment(outputDirectoryName)
     writeReadAlignmentSpreadsheet(outputDirectoryName, sequenceStats)
@@ -162,7 +164,7 @@ def analyzeReadAlignment(outputDirectory):#, totalReadCount):
                 
                 # I guess I should check for this but I don't really know what this means. Maybe it never happens.
                 if(pileupRead.is_refskip):
-                    print('This read is a refskip, i dont know what that means:' + pileupRead.alignment.query_name)
+                    print(('This read is a refskip, i dont know what that means:' + pileupRead.alignment.query_name))
                     raise Exception('This read is a refskip, i dont know what that means:' + pileupRead.alignment.query_name)
                 # else this means we have a base aligned at this position for this read.
                 
@@ -391,7 +393,7 @@ def analyzeAlleleAlignment(outputDirectory):#, totalReadCount):
                 currentBase = pileupRead.alignment.query_sequence[queryPosition].upper()
                 
                 if(pileupRead.is_refskip):
-                    print('This read is a refskip, i dont know what that means:' + pileupRead.alignment.query_name)
+                    print(('This read is a refskip, i dont know what that means:' + pileupRead.alignment.query_name))
                     raise Exception('This read is a refskip, i dont know what that means:' + pileupRead.alignment.query_name)
                 # else this means we have a base aligned at this position for this read.
                 
@@ -403,7 +405,7 @@ def analyzeAlleleAlignment(outputDirectory):#, totalReadCount):
                         myBloodGroupStats.processMismatch(bloodGroup, pileupColumnIndex,currentBase)
 
             else:
-                print ('I did not get an alignemd position for this allele:' + str(queryAlleleName))
+                print(('I did not get an alignemd position for this allele:' + str(queryAlleleName)))
                 raise Exception ('I don\'t know what to do with this aligned abo allele.')
         
   
@@ -529,7 +531,7 @@ def getPhenotype(currentSeqID):
         currentPhenotype = 'B'
         
     else:
-        print('I don\'t know what phenotype is this allele:' + str(currentSeqID))
+        print(('I don\'t know what phenotype is this allele:' + str(currentSeqID)))
         raise Exception ('I want the sequence IDs to start with ABO')
 
     return currentPhenotype
@@ -616,4 +618,3 @@ def compareIndividualABOAllelesToReference(referenceFileName, allelesFileName, o
     
     #return sequenceList
 """
- 

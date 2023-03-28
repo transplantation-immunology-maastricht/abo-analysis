@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # This file is part of abo-analysis.
 #
 # abo-analysis is free software: you can redistribute it and/or modify
@@ -100,7 +102,7 @@ class BloodGroupColumn:
         totalNucleotideCount = self.aCount + self.gCount + self.cCount + self.tCount + self.delCount
         
         if(totalNucleotideCount == 0):
-            print 'I am returning a value of -1 because apparently all my nuclotide positions are equal to zero.'
+            print('I am returning a value of -1 because apparently all my nuclotide positions are equal to zero.')
             #raise Exception('what is going on here?')
             return -1
         else:
@@ -194,3 +196,4 @@ class BloodGroupColumn:
     def mismatchBase(self, newBases):
         self.mismatchCount+= 1
         self.addNewBase(newBases)
+

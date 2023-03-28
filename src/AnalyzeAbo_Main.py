@@ -1,4 +1,6 @@
-# This file is part of abo-analysis.
+#!/usr/bin/env python3
+# 
+# # This file is part of abo-analysis.
 #
 # abo-analysis is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -26,15 +28,14 @@ from AnalyzeAbo import *
 def usage():
     print("usage:\n" + 
     "\tThis script is written for python 2.7.11\n" + 
-    "\tI haven't written the usage tutorial yet.  Oops.  Do this now please."
-    )      
+    "\tI haven't written the usage tutorial yet.  Oops.  Do this now please.")      
     
     
 # Read Commandline Arguments.  Return true if everything looks okay for read extraction.
 def readArgs():
     # Default to None.  So I can easily check if they were not passed in.
     
-    # TODO: I should pass in an Exon 6 and Exon 7 reference.
+    # Todo: I should pass in an Exon 6 and Exon 7 reference.
     # I don't need the A,B,O alleles, since I'm using logic to parse the phenotype from the allele name
     
     
@@ -113,9 +114,9 @@ def readArgs():
                 print('Unknown commandline option: ' + opt)
                 raise()
 
-    except getopt.GetoptError, errorMessage:
-        print ('Something seems wrong with your commandline parameters.')
-        print (errorMessage)
+    except getopt.GetoptError as errorMessage:
+        print('Something seems wrong with your commandline parameters.')
+        print(errorMessage)
         usage()
         return False
 
@@ -146,7 +147,7 @@ def readArgs():
         return False
         
     if not os.path.isdir(outputDirectoryName):
-        os.mkdir(outputDirectoryName)
+        os.makedirs(outputDirectoryName)
 
     return True
     
@@ -181,8 +182,6 @@ if __name__=='__main__':
     except Exception:
         # Top Level exception handling like a pro.
         # This is not really doing anything.
-        print 'Fatal problem during read extraction:'
+        print ('Fatal problem during read extraction:')
         print sys.exc_info()
-        raise
-
-
+        raise()
