@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 
+
 from Bio import pairwise2
 
-class PairwiseAlignmentResult(): 
 
-   
+class PairwiseAlignmentResult():
+    
+    
     def __init__(self, sequenceID, referenceSequence, querySequence):
-        
-        self.sequence1Aligned      = '' 
-        self.sequence2Aligned      = '' 
-        self.alignmentScore        = 0 
-        self.indexBegin            = 0 
-        self.indexEnd              = 0 
-        self.sequence1AlignedShort = '' 
-        self.sequence2AlignedShort = '' 
+        self.sequence1Aligned      = ''
+        self.sequence2Aligned      = ''
+        self.alignmentScore        = 0
+        self.indexBegin            = 0
+        self.indexEnd              = 0
+        self.sequence1AlignedShort = ''
+        self.sequence2AlignedShort = ''
         self.alignedSectionLength  = 0
         
         # Instead of storing a count of these events
@@ -28,43 +29,39 @@ class PairwiseAlignmentResult():
         # (alignment state, begin, end)
         self.allTuples              = []
         
-        
-        
         #self.matchCount            = 0
         #self.mismatchCount         = 0
         #self.insertionCount        = 0
         #self.deletionCount         = 0
         #self.indelCount            = 0
 
-
         # SequenceIDs stores the ids of the alleles in this alignment.  
         self.sequenceID            = sequenceID
         self.sequence1             = referenceSequence
-        self.sequence2             = querySequence      
+        self.sequence2             = querySequence
         
         self.alignPairwise()
-
-
-
 
 
     # TODO: Pairwise alignment takes a while.  
     # I can try some of the other alignment algorithms.
     # But then, why not just do a batch processing?
-    def alignPairwise(self):       
+
+
+    def alignPairwise(self):      
         # Alignment Parameters.
         # A match score is 0.  I chose this so a perfect match is always a score of 0.
         # I chose to punish gaps more than mismatches.  
         # Likley there is tuning to be done here.  
         # I feel like match_score should be zero but I don't get any alignments when that happens.
         # Maybe the gap penalty should be the same as a mismatch penalty, because errors with repeats are somewhat common.
-        
+         
         match_score = 1
         mismatch_score = -1
-        gap_open = -10        
+        gap_open = -10
         gap_extend = -1
         
-      
+        
         # I want a local alignment, so it allows sequences of different lengths.  
         # The method to call depends on how i want to treat mismatches and indels.
         # I found some hints in the man pages for biopython's pairwise2 package

@@ -31,16 +31,15 @@ def createOutputFile(outputfileName):
     return resultsOutput
 
 
-        
 def loadInputRecords(recordFileName):
     if (".fasta" == recordFileName[-6:] or ".fa" == recordFileName[-3:]):
         FileOutputFormat = "fasta"
-    elif (".fastq"== recordFileName[-6:] or ".fq" == recordFileName[-3:]):
+    elif (".fastq" == recordFileName[-6:] or ".fq" == recordFileName[-3:]):
         FileOutputFormat = "fastq"
     else:
         FileOutputFormat = "UnknownFormat"
-        
-    parsedInputReads = SeqIO.parse(recordFileName, FileOutputFormat)    
+
+    parsedInputReads = SeqIO.parse(recordFileName, FileOutputFormat)
     alignedSequences = enumerate(parsedInputReads)
-    
+
     return alignedSequences
