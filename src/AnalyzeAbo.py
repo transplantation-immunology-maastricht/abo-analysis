@@ -324,8 +324,8 @@ def analyzeChosenPolymorphicPositions(referenceFileName, outputDirectory, sequen
 
         #phenotypeOutputFile.write('Genomic position: 261')
         phenotypeOutputFile.write('\nExon 6 position(1-based): 22\n')
-        phenotypeOutputFile.write('G nucleotide -> A or B blood type.\n')
-        phenotypeOutputFile.write('Deletion     -> O blood type.')
+        phenotypeOutputFile.write('G nucleotide: A or B blood type.\n')
+        phenotypeOutputFile.write('Deletion    : O blood type.')
         printBasePolymorphisms(phenotypeOutputFile, 21,
                                sequenceStats[21])  # pass the 0-based
 
@@ -338,14 +338,14 @@ def analyzeChosenPolymorphicPositions(referenceFileName, outputDirectory, sequen
         #phenotypeOutputFile.write('Genomic position: 796')
         # Think I have this backwards on my poster.  Oops.
         phenotypeOutputFile.write('\nExon 7 position(1-based): 422\n')
-        phenotypeOutputFile.write('A nucleotide -> B blood type.\n')
-        phenotypeOutputFile.write('C nucelotide -> A or O blood type.')
+        phenotypeOutputFile.write('A nucleotide: B blood type.\n')
+        phenotypeOutputFile.write('C nucelotide: A or O blood type.')
         printBasePolymorphisms(phenotypeOutputFile, 421, sequenceStats[421])
 
         #phenotypeOutputFile.write('Genomic position: 803')
         phenotypeOutputFile.write('\nExon 7 position(1-based): 429\n')
-        phenotypeOutputFile.write('G nucleotide -> A or O blood type.\n')
-        phenotypeOutputFile.write('C nucelotide -> B blood type.')
+        phenotypeOutputFile.write('G nucleotide: A or O blood type.\n')
+        phenotypeOutputFile.write('C nucelotide: B blood type.')
         printBasePolymorphisms(phenotypeOutputFile, 428, sequenceStats[428])
 
     else:
