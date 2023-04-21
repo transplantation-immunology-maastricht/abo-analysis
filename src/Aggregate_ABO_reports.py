@@ -7,8 +7,9 @@ from openpyxl import Workbook
 from openpyxl import load_workbook
 
 # Define input and output directories
-input_dir = "/data/abo_genotypes/abo-analysis/output"
+input_dir = "/data/FSH_Bioinformatics/2023_002_ABO_type/output"
 
+# Function to extract exon 7 (position 422, 429) information from output tables
 def parse_exon7(filename):    
     # Open the file for reading
     with open(filename, 'r') as f:
@@ -49,18 +50,18 @@ def parse_exon7(filename):
     # Add the 'Type' column based on values in the [Ins Del A G C T] columns
     def get_type(row):
         if row['Position'] == 422:
-            if row['A'] > 80:
+            if row['A'] >= 80:
                 return 'B'
-            elif row['C'] > 80:
+            elif row['C'] >= 80:
                 return 'A or O'
-            elif abs(row['A'] - row['C']) <= 20:
+            elif abs(row['A'] - row['C']) <= 40:
                 return '(A or O) and B'
         elif row['Position'] == 429:
-            if row['G'] > 80:
+            if row['G'] >= 80:
                 return 'A or O'
-            elif row['C'] > 80:
+            elif row['C'] >= 80:
                 return 'B'
-            elif abs(row['G'] - row['C']) <= 20:
+            elif abs(row['G'] - row['C']) <= 40:
                 return '(A or O) and B'
         return ''
     
@@ -71,7 +72,7 @@ def parse_exon7(filename):
     
     return df
 
-
+# Function to extract exon 6 (position 22) information from output tables
 def parse_exon6(filename):    
     # Open the file for reading
     with open(filename, 'r') as f:
@@ -117,8 +118,7 @@ def parse_exon6(filename):
 
     return df
 
-# Add Pheno, Geno, Expecetd columns to dataframe.
-
+# Add Pheno, Geno, Expecetd columns to dataframe.|| This did not work TODO in different function
 def add_phenotype_genotype(df):
     # Find the column numbers with "Type" in the column name
     type_cols = [i for i, col in enumerate(df.columns) if 'Type' in col]
@@ -128,7 +128,7 @@ def add_phenotype_genotype(df):
     Type2 = df.columns[type_cols[1]]
     Type3 = df.columns[type_cols[2]]
     
-    print(Type1, Type2, Type3)
+    # print(Type1, Type2, Type3)
     # Add the Phenotype, Genotype, and Expected columns
     df['Phenotype'] = ''
     df['Genotype'] = ''
@@ -139,38 +139,50 @@ def add_phenotype_genotype(df):
             df.at[i, 'Phenotype'] = 'A'
             df.at[i, 'Genotype'] = 'AA'
             df.at[i, 'Expected'] = 'AA'
-        # elif ((df.loc[i, Type1] == 'A or B') and (df.loc[i, Type2] == 'B') and (df.loc[i, Type3] == 'B')).empty().any().all().item():
-        #     df.at[i, 'Phenotype'] = 'B'
-        #     df.at[i, 'Genotype'] = 'BB'
-        #     df.at[i, 'Expected'] = 'BB'
-        # elif (df.loc[i, Type1] == 'A or B') and (df.loc[i, Type2] == '(A or O) and B') and (df.loc[i, Type3] == '(A or O) and B'):
-        #     df.at[i, 'Phenotype'] = 'AB'
-        #     df.at[i, 'Genotype'] = 'AB'
-        #     df.at[i, 'Expected'] = 'AB'
-        # elif (df.loc[i, Type1] == 'O and (A or B)') and (df.loc[i, Type2] == 'A or O') and (df.loc[i, Type3] == 'A or O'):
-        #     df.at[i, 'Phenotype'] = 'A'
-        #     df.at[i, 'Genotype'] = 'AO'
-        #     df.at[i, 'Expected'] = 'AO'
-        # elif (df.loc[i, Type1] == 'O and (A or B)') and (df.loc[i, Type2] == '(A or O) and B') and (df.loc[i, Type3] == '(A or O) and B'):
-        #     df.at[i, 'Phenotype'] = 'B'
-        #     df.at[i, 'Genotype'] = 'BO'
-        #     df.at[i, 'Expected'] = 'BO'
-        # elif (df.loc[i, Type1] == 'O') and (df.loc[i, Type2] == 'A or O') and (df.loc[i, Type3] == 'A or O'):
-        #     df.at[i, 'Phenotype'] = 'O'
-        #     df.at[i, 'Genotype'] = 'OO'
-        #     df.at[i, 'Expected'] = 'OO'
-        # elif (df.loc[i, Type1] == 'O and (A or B)') and (df.loc[i, Type2] == 'A or O') and (df.loc[i, Type3] == 'Unknown'):
-        #     df.at[i, 'Phenotype'] = 'A'
-        #     df.at[i, 'Genotype'] = 'AO'
-        #     df.at[i, 'Expected'] = 'Unknown'
-        # elif ((df.loc[i, Type1] == 'O and (A or B)') and (df.loc[i, Type2] == 'A or O') and (df.loc[i, Type3] == 'Unknown')).all():
-        #     df.at[i, 'Phenotype'] = 'A'
-        #     df.at[i, 'Genotype'] = 'AO'
-        #     df.at[i, 'Expected'] = 'Unknown'
         else:
-            df.at[i, 'Phenotype'] = 'Indeterminate'
-            df.at[i, 'Genotype'] = 'Indeterminate'
-            df.at[i, 'Expected'] = 'Indeterminate'
+            df.at[i, 'Phenotype'] = ''
+            df.at[i, 'Genotype'] = ''
+            df.at[i, 'Expected'] = ''
+    return df
+
+def assign_phenotype_genotype(df):
+    exon6 = df[('Exon 6 pos 22', 'Type')]
+    exon7_422 = df[('Exon 7 pos 422', 'Type')]
+    exon7_429 = df[('Exon 7 pos 429', 'Type')]
+
+    if (exon6 == 'A or B').all() and (exon7_422 == 'A or O').all() and (exon7_429 == 'A or O').all():
+        Phenotype = 'A'
+        Genotype = 'AA'
+        Expected = 'Enter-manually'
+    elif (exon6 == 'A or B').all() and (exon7_422 == 'B').all() and (exon7_429 == 'B').all():
+        Phenotype = 'B'
+        Genotype = 'BB'
+        Expected = 'Enter-manually'
+    elif (exon6 == 'A or B').all() and (exon7_422 == '(A or O) and B').all() & (exon7_429 == '(A or O) and B').all():
+        Phenotype = 'AB'
+        Genotype = 'AB'
+        Expected = 'Enter-manually'
+    elif (exon6 == 'O').all() and (exon7_422 == 'A or O').all() and (exon7_429 == 'A or O').all():
+        Phenotype = 'O'
+        Genotype = 'OO'
+        Expected = 'Enter-manually'
+    elif (exon6 == 'O and (A or B)').all() and (exon7_422 == 'A or O').all() and (exon7_429 == 'A or O').all():
+        Phenotype = 'A'
+        Genotype = 'AO'
+        Expected = 'Enter-manually'
+    elif (exon6 == 'O and (A or B)').all() and (exon7_422 == '(A or O) and B').all and (exon7_429 == '(A or O) and B').all():
+        Phenotype = 'B'
+        Genotype = 'BO'
+        Expected = 'Enter-manually'
+    else:
+        Phenotype = 'Unknown'
+        Genotype = 'Unknown'
+        Expected = 'Enter-manually'
+
+    df[('', 'Phenotype')] = Phenotype
+    df[('', 'Genotype')] = Genotype
+    df[('', 'Expected')] = Expected
+
     return df
 
 # create an empty list to store the dataframes
@@ -191,85 +203,59 @@ columns = pd.MultiIndex.from_arrays([header_cols, header_rows])
 # Loop through all files in the input directory
 for filename in os.listdir(input_dir):
     # Check if the file is a sample folder (for HSS Perth, these files start with IMM[0-9] with _barcode[0-9])
-    import re
-
+    # if os.path.isdir(os.path.join(input_dir, filename)) and filename.startswith("IMM") and "barcode" in filename and "POS" not in filename:
     if os.path.isdir(os.path.join(input_dir, filename)):
         match = re.match(r"^IMM-[0-9]+-[0-9]+_barcode\d+", filename)
         if match:
+            # process the file
             print("Processing file: " + filename)
-        # process the file
-        # if os.path.isdir(os.path.join(input_dir, filename)) and filename.startswith("IMM") and "barcode" in filename and "POS" not in filename:
             # Get the sample name and barcode from the folder name
             sample_name, barcode = filename.split("_")
             # print("\nProcessing Sample %s with barcode %s" %(barcode, sample_name))
-
             # Process exon 6 and 7 data using the files
             exon6_file = os.path.join(input_dir, filename, "exon6", "ABOPhenotype.txt")
             exon7_file = os.path.join(input_dir, filename, "exon7", "ABOPhenotype.txt")
-            
             df_exon6 = parse_exon6(exon6_file)
-            # print(df_exon6)
             df_exon7 = parse_exon7(exon7_file)
-            # print(df_exon7)
-
             # create two subset dataframes, one for each row of df for exon7
             df_exon7_pos422 = df_exon7.iloc[[0]].reset_index(drop = True)
             df_exon7_pos429 = df_exon7.iloc[[1]].reset_index(drop = True)
-
-            print(df_exon7_pos422)
-            print(df_exon7_pos429)
-
+            # print(df_exon7_pos422)
+            # print(df_exon7_pos429)
             sample = pd.DataFrame({
                 'Barcode': [barcode],
                 'Sample': [sample_name]
                 })
-
             # concatenate the dataframes side by side
-
-            merged_df = pd.concat([sample, df_exon6, df_exon7_pos422, df_exon7_pos429], 
-                                axis = 1, join = "inner").drop(['Exon', 'Position'], axis = 1)
-            
-
+            merged_df = pd.concat(
+                [sample, df_exon6, df_exon7_pos422, df_exon7_pos429],
+                axis = 1,
+                join = "inner").drop(['Exon', 'Position'],
+                axis = 1)
+            # delete 'barcode' and leave only numbers in Barcode column
             merged_df['Barcode'] = merged_df['Barcode'].str.replace('barcode', '', case = False)
             # Convert the Barcode column to numeric
             merged_df['Barcode'] = pd.to_numeric(merged_df['Barcode'], errors = 'coerce')
-
+            # Add pheno, gen, expected columns and data
             merged_df = add_phenotype_genotype(merged_df)
-
-            # print(merged_df)
-
-            # # set the column headers to the MultiIndex
+            # set the column headers to the MultiIndex
             merged_df.columns = columns
-
             # print(merged_df.shape)
             # print(columns.shape)
-        
-            
-            
-
             # append the merged_df to the results list
+            merged_df = assign_phenotype_genotype(merged_df)
             results.append(merged_df)
             print("Done adding Sample %s with barcode %s to merged data frame\n" %(barcode, sample_name))
 
-
 # concatenate all the dataframes in the results list into one dataframe
+print("Creating merged dataframe for all samples.\n")
 final_df = pd.concat(results)
+final_df = final_df.sort_values(('', 'Barcode'))
 
 print(final_df.to_string(index = False), "\n")
 
-# # Write the concatenated dataframe to a text file
+# Write the concatenated dataframe to a text file
 final_df.to_csv(os.path.join(input_dir,'result.txt'), sep = '\t', index = False)
 
-# # write the final dataframe to an excel file
+# write the final dataframe to an excel file
 final_df.to_excel(os.path.join(input_dir,'result.xlsx'), sheet_name = "ABO_Result", index = True)
-
-# # Write the DataFrame to an Excel file with merged cells and no row_num.. 
-# with pd.ExcelWriter(os.path.join(input_dir,'result.xlsx'), engine = 'openpyxl') as writer:
-#     final_df.to_excel(writer, sheet_name = 'ABO_Result')
-#     workbook  = writer.book
-#     worksheet = writer.sheets['ABO_Result']
-#     for merged in worksheet.merged_cells:
-#         worksheet.unmerge_cells(str(merged))
-#         worksheet.merge_cells(str(merged))
-#     writer.save()
-
