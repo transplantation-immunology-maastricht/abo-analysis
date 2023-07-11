@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # This file is part of abo-analysis.
 #
 # abo-analysis is free software: you can redistribute it and/or modify
@@ -29,16 +31,15 @@ def createOutputFile(outputfileName):
     return resultsOutput
 
 
-        
 def loadInputRecords(recordFileName):
     if (".fasta" == recordFileName[-6:] or ".fa" == recordFileName[-3:]):
         FileOutputFormat = "fasta"
-    elif (".fastq"== recordFileName[-6:] or ".fq" == recordFileName[-3:]):
+    elif (".fastq" == recordFileName[-6:] or ".fq" == recordFileName[-3:]):
         FileOutputFormat = "fastq"
     else:
         FileOutputFormat = "UnknownFormat"
-        
-    parsedInputReads = SeqIO.parse(recordFileName, FileOutputFormat)    
+
+    parsedInputReads = SeqIO.parse(recordFileName, FileOutputFormat)
     alignedSequences = enumerate(parsedInputReads)
-    
+
     return alignedSequences
