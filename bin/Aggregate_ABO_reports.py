@@ -4,8 +4,6 @@ import sys
 import re
 import pandas as pd
 import openpyxl
-from openpyxl import Workbook
-from openpyxl import load_workbook
 
 # Get the command-line arguments
 args = sys.argv
@@ -16,27 +14,39 @@ if len(args) < 1:
     sys.exit(1)
 
 # Define input and output directories
+# this used to be hardcoded, may need extra testing
 input_dir = args[1]
 
 # Function to extract exon 7 (position 422, 429) information from output tables
 def parse_exon7(filename):    
     # Open the file for reading
+
+    # Check if the file exists
+    if not os.path.exists(filename):
+        print(f"File not found: {filename}")
+        return None
+
     with open(filename, 'r') as f:
         lines = f.readlines()
 
-        # Extract the required lines from the first section
-        pos1 = int(lines[2].split(':')[1].strip())
-        nuc1 = lines[3].split(':')[1].strip()
-        blood1 = lines[4].split(':')[1].strip()
-        count1 = int(lines[6].split(':')[1].strip())
-        mat1, mis1, ins1, del1, a1, g1, c1, t1 = [int(x) for x in lines[8].split()]
+    # check input reads
+    if len(lines) < 17:
+       print(f"Not enough data in file (reads too short): {filename}")
+       return None
 
-        # Extract the required lines from the second section
-        pos2 = int(lines[10].split(':')[1].strip())
-        nuc2 = lines[11].split(':')[1].strip()
-        blood2 = lines[12].split(':')[1].strip()
-        count2 = int(lines[14].split(':')[1].strip())
-        mat2, mis2, ins2, del2, a2, g2, c2, t2 = [int(x) for x in lines[16].split()]
+    # Extract the required lines from the first section
+    pos1 = int(lines[2].split(':')[1].strip())
+    nuc1 = lines[3].split(':')[1].strip()
+    blood1 = lines[4].split(':')[1].strip()
+    count1 = int(lines[6].split(':')[1].strip())
+    mat1, mis1, ins1, del1, a1, g1, c1, t1 = [int(x) for x in lines[8].split()]
+
+    # Extract the required lines from the second section
+    pos2 = int(lines[10].split(':')[1].strip())
+    nuc2 = lines[11].split(':')[1].strip()
+    blood2 = lines[12].split(':')[1].strip()
+    count2 = int(lines[14].split(':')[1].strip())
+    mat2, mis2, ins2, del2, a2, g2, c2, t2 = [int(x) for x in lines[16].split()]
 
     # Create a DataFrame from the extracted values
     df = pd.DataFrame({
@@ -86,6 +96,11 @@ def parse_exon6(filename):
     # Open the file for reading
     with open(filename, 'r') as f:
         lines = f.readlines()
+
+        # check input reads
+        if len(lines) < 9:
+            print(f"Not enough data in file (reads too short): {filename}")
+            return None
 
         # Extract the required lines from the first section
         pos1 = int(lines[2].split(':')[1].strip())
@@ -274,10 +289,16 @@ final_df = pd.concat(results)
 final_df = final_df.sort_values(('', 'Barcode'))
 
 # Write the concatenated dataframe to a text file
-final_df.to_csv('./ABO_result.txt', sep='\t', index=False)
+try: 
+    final_df.to_csv('./ABO_result.txt', sep='\t', index=False)
+except IOError:
+	print("Could not write text file")
 
 # Write the final dataframe to an Excel file
-final_df.to_excel('./ABO_result.xlsx', sheet_name="ABO_Result", index=True)
+try:
+    final_df.to_excel('./ABO_result.xlsx', sheet_name="ABO_Result", index=True)
+except IOError:
+	print("Could not write Excel file")
 
 # # Loop through all files in the input directory
 # for filename in os.listdir(input_dir):
