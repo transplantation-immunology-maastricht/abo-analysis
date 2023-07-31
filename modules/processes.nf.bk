@@ -4,6 +4,11 @@ process run_fastqc {
     tag "$name"
     label 'process_medium'
 
+    conda "bioconda::fastqc=0.11.9", useMamba: true
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/fastqc:0.11.9--0' :
+        'biocontainers/fastqc:0.11.9--0' }"
+    
     publishDir "${params.outdir}/reports/fastqc", mode: 'copy'
     cache true
     errorStrategy 'ignore'
@@ -34,6 +39,11 @@ process process_exon6 {
     errorStrategy 'ignore'
     cache true
 
+    conda "bioconda::bwa=0.7.17 bioconda::samtools=1.16.1", useMamba: true
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:219b6c272b25e7e642ae3ff0bf0c5c81a5135ab4-0' :
+        'biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:219b6c272b25e7e642ae3ff0bf0c5c81a5135ab4-0' }"
+ 
     input:
         tuple val(name), path(readsForMapping)
         path(reference)
@@ -67,6 +77,11 @@ process process_exon7 {
     errorStrategy 'ignore'
     cache true
  
+    conda "bioconda::bwa=0.7.17 bioconda::samtools=1.16.1", useMamba: true
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:219b6c272b25e7e642ae3ff0bf0c5c81a5135ab4-0' :
+        'biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:219b6c272b25e7e642ae3ff0bf0c5c81a5135ab4-0' }"
+
     input:
         tuple val(name), path(readsForMapping)
         path(reference)
@@ -117,6 +132,11 @@ process run_multiqc {
     publishDir "${params.outdir}/reports/multiqc", mode: 'copy', overwrite: false
     label 'process_single'
 
+    conda "bioconda::multiqc=1.14", useMamba: true
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/multiqc:1.14--pyhdfd78af_0' :
+        'biocontainers/multiqc:1.14--pyhdfd78af_0' }"
+    
     errorStrategy 'ignore'
 
     input:
@@ -175,3 +195,5 @@ process render_rmarkdown {
             )
         """
 } 
+
+

@@ -302,7 +302,7 @@ workflow {
 	input = validate_input()
 
 	// Check that all of the software is installed and finds the version info where possible.
-    versions = check_env()    
+    versions = check_env()
     
     // Collect fastq reads for mapping and fastqc 
 	if ( params.reads ) {
