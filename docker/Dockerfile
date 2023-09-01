@@ -5,7 +5,7 @@ FROM nvidia/cuda:12.0.0-runtime-ubuntu20.04
 LABEL image.author.name="Fredrick Mobegi"
 LABEL image.author.email="fredrickmaati@gmail.com"
 
-ARG GENERAL_DEPENDENCIES="wget apt-transport-https software-properties-common apt-utils sudo procps cmake python-biopython"
+ARG GENERAL_DEPENDENCIES="wget apt-transport-https software-properties-common apt-utils sudo procps cmake"
 
 # Set non-interactive mode to override any user inputs requested by package installations
 ENV DEBIAN_FRONTEND noninteractive
