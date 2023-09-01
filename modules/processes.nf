@@ -103,10 +103,12 @@ process compile_results{
     output:
         path("*.txt")
         path("*.xlsx")
+        path("*.csv")
+        path("*.log")
  
     script:
         """
-        python $projectDir/bin/Aggregate_ABO_reports.py $snp_position_files
+        python $projectDir/bin/Aggregate_ABO_reports.py $snp_position_files > ABO_results.log 2>&1
         """
 }
 

@@ -25,3 +25,8 @@ RUN apt-get update && \
 
 # Clean up the package manager caches
 USER $MAMBA_USER
+
+## Build
+#  docker build -t fmobegi/abo-analysis .
+## Push
+#
