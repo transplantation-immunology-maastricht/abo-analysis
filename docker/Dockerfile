@@ -5,6 +5,12 @@ FROM nvidia/cuda:12.0.0-runtime-ubuntu20.04
 LABEL image.author.name="Fredrick Mobegi"
 LABEL image.author.email="fredrickmaati@gmail.com"
 
+# Set the environment variables for language and timezone
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
+ENV TZ=Australia/Perth
+
 ARG GENERAL_DEPENDENCIES="wget apt-transport-https software-properties-common apt-utils sudo procps cmake"
 
 # Set non-interactive mode to override any user inputs requested by package installations
