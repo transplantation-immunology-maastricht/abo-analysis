@@ -1,6 +1,6 @@
 # ABO blood group typing using Oxford Nanopore MinION sequencing
 
-ABO sequences were aquired from the NCBI dbRBC database:
+ABO sequences were acquired from the NCBI dbRBC database:
 
 [https://www.ncbi.nlm.nih.gov/projects/gv/mhc/xslcgi.cgi?cmd=bgmut/home](https://www.ncbi.nlm.nih.gov/projects/gv/mhc/xslcgi.cgi?cmd=bgmut/home)
 
@@ -28,7 +28,7 @@ The pipeline makes use of the following dependencies:
 
 # Testing without `nextflow`
 
-The pipeline can be tested of single input file by cloning this repo and installing all dependncies above, then running the following commands:
+The pipeline can be tested on a single input file by cloning this repo and installing all dependencies above, then running the following commands:
 
 ```python
 python bin/AnalyzeAbo_Main.py  \
@@ -112,19 +112,19 @@ The `ABOPhenotype.txt` files from each sampe can then be collated using:
 
 # The `nextflow` workflow
 
-The steps above are simplified in a `NextFlow; https://www.nextflow.io/` pipeline that does all the above steps and streamlines installation of requisite software and tools with a single command.
+The steps above are simplified in a `NextFlow; https://www.nextflow.io/` pipeline that does all the above steps and streamlines the installation of requisite software and tools with a single command.
 
-Besides reproducability, nextflow offeres several advatages over conventional `for loops`, including scallability, portability, and debugging/resumption of failed tasks.
+Besides reproducibility, nextflow offers several advantages over conventional `for loops`, including scalability, portability, and debugging/resumption of failed tasks.
 
-Input files and output directory can be defined in the config files or provided directly in the commandline.
+Input files and the output directory can be defined in the config files or provided directly in the command-line.
 
-To analyse files with config, run:
+To analyze files with config, run:
 
-- `nextflow run main.nf -resume ` (user can override inputs and output using `--reads '*.fastq' --outdir 'ABO_results'` on the commandline).
+- `nextflow run main.nf -resume ` (user can override inputs and output using `--reads '*.fastq' --outdir 'ABO_results'` on the command-line).
 
-We have also added the ability for the pipeline to automatically set-up a conda or docker based environment with all required tools and libraries.
+We have also added the ability for the pipeline to automatically set up a conda or docker-based environment with all required tools and libraries.
 
-Users may also opt for a workload manager such as `-profile slurm,docker|-profile slurm,conda`, is which case, all required modules docker/conda must be installed and loaded. The config slurm parameters must also be defined to ensure tasks are submitted to the correct resource queue/account.
+Users may also opt for a workload manager such as `-profile slurm, docker|-profile slurm, conda`, in which case, all required modules docker/conda must be installed and loaded. The config slurm parameters must also be defined to ensure tasks are submitted to the correct resource queue/account.
 
 For `conda` environment, it is advisable to prepare the working computer using mamba for easy resolution of environments.
 Follow these steps to achieve better results.
