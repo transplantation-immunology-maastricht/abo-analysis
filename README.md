@@ -1,4 +1,4 @@
-# ABO blood typing using Oxford Nanopore MinION sequencing
+# ABO blood group typing using Oxford Nanopore MinION sequencing
 
 ABO sequences were aquired from the NCBI dbRBC database:
 
