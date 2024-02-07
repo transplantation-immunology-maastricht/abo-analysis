@@ -3,16 +3,18 @@
 
 workflow check_env {
     main:
-    fastqc = get_fastqc_version()
-    bwa = get_bwa_version()
-    samtools = get_samtools_version()
-    multiqc = get_multiqc_version()
+        fastqc = get_fastqc_version()
+        bwa = get_bwa_version()
+        minimap2 = get_minimap2_version()
+        samtools = get_samtools_version()
+        multiqc = get_multiqc_version()
     
 	emit:
-    fastqc
-    bwa
-    samtools
-    multiqc
+        fastqc
+        bwa
+        minimap2
+        samtools
+        multiqc
 }
 
 process get_fastqc_version {
@@ -56,6 +58,27 @@ process get_bwa_version {
     fi
 
     VERSION="\$(bwa 2>&1 | grep -oP 'Version: \\K\\S+')"
+    """
+}
+
+process get_minimap2_version {
+    label 'minimap2'
+
+    output:
+    env VERSION
+
+    script:
+    """
+    if ! which minimap2 > /dev/null
+    then
+        echo -e "Could not find the program 'minimap2' in your environment path.\n" 1>&2
+
+        echo "Please install minimap2 before you can continue." 1>&2
+
+        exit 127
+    fi
+
+    VERSION="\$(minimap2 --version)"
     """
 }
 
@@ -119,7 +142,8 @@ process publish_software {
     echo "
     FASTQC: "\$(fastqc --version | sed -e "s/FastQC v//g")"
     BWA: "\$(bwa 2>&1 | grep -oP 'Version: \\K\\S+')"
-    SAMTOOLS:"\$(samtools --version| grep -E "(^samtool|Using htslib)"  | \\
+    MINIMAP2: "\$(minimap2 --version)"
+    SAMTOOLS:"\$(samtools --version| grep -E "(^samtool|Using htslib)" | \\
         sed -e "s/samtools//g" |\\
         sed -e "s/Using/: using/g" )""  >> tmp.txt
     echo "

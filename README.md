@@ -1,4 +1,4 @@
-# ABO blood typing using Oxford Nanopore MinION sequencing.
+# ABO blood typing using Oxford Nanopore MinION sequencing
 
 ABO sequences were aquired from the NCBI dbRBC database:
 
@@ -9,27 +9,28 @@ See [https://ftp.ncbi.nlm.nih.gov/pub/mhc/rbc/Final%20Archive/Excel_and_PowerPoi
 # Required tools
 
 The pipeline makes use of the following dependencies:
-
-- bioconda::fastqc=0.11.9
-- bioconda::bwa=0.7.17
-- bioconda::samtools=1.16.1
-- bioconda::multiqc=1.14
-- conda-forge::biopython=1.81
+- bioconda::fastqc=0.12.1
+- bioconda::bwa=0.7.17 
+- conda-forge::ncurses
+- bioconda::samtools=1.19.2
+- bioconda::minimap2=2.26
+- conda-forge::biopython=1.83
 - python=3.10
+- pip
 - pip:
-  - numpy==1.21.5
-  - Bio==1.5.9
+  - numpy==1.26.4
+  - Bio==1.6.2
   - openpyxl==3.1.2
-  - pandas==1.5.3
-  - pysam==0.21.0
-  - matplotlib==3.7.1
-  - xlsxwriter==3.1.2
+  - pandas==2.2.0
+  - pysam==0.22.0
+  - matplotlib==3.8.2
+  - xlsxwriter==3.1.9
 
 # Testing without `nextflow`
 
 The pipeline can be tested of single input file by cloning this repo and installing all dependncies above, then running the following commands:
 
-```
+```python
 python bin/AnalyzeAbo_Main.py  \
  --reference="assets/A1_01_01_1_reference_Exon6.fasta" \
  --alleles="assets/ABO_Database.fasta" \
@@ -49,7 +50,7 @@ Looping through a couple of samples with the above command will generate the fol
 
 Data structure
 
-```
+```bash
 OutputDirectoryName/
 ├── Sample1
 │   ├── exon6
@@ -71,7 +72,7 @@ OutputDirectoryName/
 
 With individual files named as follows:
 
-```
+```bash
 OutputDirectoryName/
 ├── Sample1
 │   ├── exon6
@@ -125,14 +126,26 @@ We have also added the ability for the pipeline to automatically set-up a conda 
 
 Users may also opt for a workload manager such as `-profile slurm,docker|-profile slurm,conda`, is which case, all required modules docker/conda must be installed and loaded. The config slurm parameters must also be defined to ensure tasks are submitted to the correct resource queue/account.
 
+For `conda` environment, it is advisable to prepare the working computer using mamba for easy resolution of environments.
+Follow these steps to achieve better results.
+
+```bash
+mamba create -y -n abo-analysis-env
+conda activate abo-analysis-env
+mamba env update --file abo-analysis/assets/conda.yml --prune
+conda deactivate
+```
+
 To run without the workload manager but with a specific containerization, use:
 
-- `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -with-conda` or `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -profile conda`
-- `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -with-docker` or `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -profile docker`
+- `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -with-conda abo-analysis-env` or
+  `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -profile conda`
+- `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -with-docker fmobegi/abo-analysis` or
+  `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -profile docker`
 
 # Results from the `Nextflow` pipeline will look something like this:
 
-```
+```bash
 230128R_ABO_results/
 ├── ABO_result.txt
 ├── ABO_result.xlsx

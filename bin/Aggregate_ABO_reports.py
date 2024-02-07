@@ -72,18 +72,23 @@ class ABOReportParser:
         def get_type(row):
             """Add the 'Type' column based on values in the [Ins Del A G C T] columns"""
             if row['Position'] == 422:
-                if row['A'] >= 60:
+                if row['A'] >= 80:
                     return 'B'
-                elif row['C'] >= 60:
+                elif row['C'] >= 80:
                     return 'A or O'
                 elif abs(row['A'] - row['C']) <= 20:
                     return '(A or O) and B'
+                elif 20 < row['A'] < 80 and 20 < row['C'] < 80:
+                    return '(A or O) and B'
+                
             if row['Position'] == 429:
-                if row['G'] >= 60:
+                if row['G'] >= 80:
                     return 'A or O'
-                elif row['C'] >= 60:
+                elif row['C'] >= 80:
                     return 'B'
                 elif abs(row['G'] - row['C']) <= 20:
+                    return '(A or O) and B'
+                elif 20 < row['G'] < 80 and 20 < row['C'] < 80:
                     return '(A or O) and B'
             return ''
 
@@ -123,12 +128,14 @@ class ABOReportParser:
         df['Position'] = df['Position'].apply(lambda x: x)
         max_g = df['G'].max()
         max_del = df['Del'].max()
-        if max_g >= 60 and max_g > max_del:
+        if max_g >= 80 and max_g > max_del:
             df['Type'] = 'A or B'
-        elif max_del >= 60 and max_del > max_g:
+        elif max_del >= 80 and max_del > max_g:
             df['Type'] = 'O'
-        elif abs(max_g + max_del) >= 50:
+        elif abs(max_g + max_del) >= 20:
             df['Type'] = 'O and (A or B)'
+        elif 20 < df['Del'] < 80 and 20 < df['G']< 80:
+            return 'O and (A or B)'
         else:
             df['Type'] = ''
 

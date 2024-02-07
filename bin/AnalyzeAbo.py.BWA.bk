@@ -71,12 +71,12 @@ def alignSequencesAgainstReference(referenceLocation, alleleFileLocation, output
         SeqIO.write([refSequence], sequenceWriter, 'fasta')
         sequenceWriter.close()
 
-        # Index The Reference || BWA deprecated !!
-        # cmd = ("bwa index " + newReferenceLocation)
-        # os.system(cmd)
+        # Index The Reference
+        cmd = ("bwa index " + newReferenceLocation)
+        os.system(cmd)
 
     except Exception:
-        print('Exception indexing alignment reference. Is minimap2 installed? Folder writing permission issue?')
+        print('Exception indexing alignment reference. Is bwa installed? Folder writing permission issue?')
         raise
 
     # Part 2 Align
@@ -84,28 +84,18 @@ def alignSequencesAgainstReference(referenceLocation, alleleFileLocation, output
         # align | sam->bam | sort
         tempAlignmentName = join(alignmentSubdir, 'alignment')
         alignmentOutputName = tempAlignmentName + '.bam'
-        minimap2Args = "-ax map-ont -t 8"
-        
-        ## BWA replaced with minimap2 for long-read alignment
-        # bwaMemArgs = "-t 4 -x ont2d"
-        # cmd = ("bwa mem " +
-        #        bwaMemArgs + " " +
-        #        newReferenceLocation + " " +
-        #        alleleFileLocation +
-        #        " | samtools view  -Sb - | samtools sort -o "
-        #        + alignmentOutputName)
-        cmd = ("minimap2 " +
-               minimap2Args + " " +
+        bwaMemArgs = "-t 4 -x ont2d"
+        cmd = ("bwa mem " +
+               bwaMemArgs + " " +
                newReferenceLocation + " " +
                alleleFileLocation +
                " | samtools view  -Sb - | samtools sort -o "
                + alignmentOutputName)
         #print ('alignment command:\n' + cmd)
-
         os.system(cmd)
 
     except Exception:
-        print('Exception aligning reads against reference. Are minimap2 and samtools installed?')
+        print('Exception aligning reads against reference. Are bwa and samtools installed?')
         raise
 
     # Part 3 Index Alignment
@@ -115,7 +105,7 @@ def alignSequencesAgainstReference(referenceLocation, alleleFileLocation, output
         os.system(cmd)
         #print ('index command:\n' + cmd)
     except Exception:
-        print('Exception indexing alignment reference. Is minimap2 installed?')
+        print('Exception indexing alignment reference. Is bwa installed?')
         raise
 
 

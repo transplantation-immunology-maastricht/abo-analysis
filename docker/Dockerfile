@@ -65,7 +65,7 @@ RUN mamba create -y -n fastqc_env -c bioconda fastqc
 RUN mamba create -y -n multiqc_env -c bioconda multiqc
 
 # Create a Conda environment for Samtools and BWA
-RUN mamba create -y -n samtools_and_bwa_env -c bioconda samtools bwa
+RUN mamba create -y -n samtools_and_bwa_env -c bioconda samtools bwa minimap2
 
 # Copy the environment.yml file into the container
 WORKDIR /home
@@ -75,8 +75,12 @@ RUN mamba create -n abo-analysis-env \
     && mamba env update -n abo-analysis-env -f env.yml \
     && mamba clean --all --yes
 
+RUN echo "source activate abo-analysis-env" >> ~/.bashrc
+ENV PATH /conda-envs/abo-analysis-env/bin:$PATH
+
 # Install Python 3 tools
-ARG PYTHON_TOOLS="numpy==1.21.5 Bio==1.5.9 pysam==0.21.0 pandas==1.5.3 scipy matplotlib==3.7.1 biopython openpyxl==3.1.2 xlsxwriter==3.1.2"
+# ARG PYTHON_TOOLS="numpy==1.21.5 Bio==1.5.9 pysam==0.21.0 pandas==1.5.3 scipy matplotlib==3.7.1 biopython openpyxl==3.1.2 xlsxwriter==3.1.2 multiqc==1.17"
+ARG PYTHON_TOOLS="numpy==1.26.4 Bio==1.6.2 pysam==0.22.0 pandas==2.2.0 scipy matplotlib==3.8.2 biopython openpyxl==3.1.2 xlsxwriter==3.1.9 multiqc==1.18"
 
 RUN pip3 install --upgrade pip \
     && pip3 install $PYTHON_TOOLS
@@ -102,15 +106,12 @@ RUN nextflow self-update
 # Define Command or Entry Point
 CMD ["/bin/bash"]
 
-
 # TO BUILD THE CONTAINER RUN:
 #    docker build -t pathwestminion.azurecr.io/[**Type Name**]:v[**Type a New Version Number**] -f Dockerfile .  <--Note the period (".") at the end. This is required, and tells Docker to include files in the current folder
 # For example:
 #    docker build -t pathwestminion.azurecr.io/abotypes1.0:v1 -f Dockerfile .
 
-
 ## -------------------  Additional tests ----------------------------------
-
 
 # # Use a specific version of micromamba as the base image
 # FROM mambaorg/micromamba:0.25.1
@@ -159,7 +160,5 @@ CMD ["/bin/bash"]
 #     apt-get clean && \
 #     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# ## Build
-# #  docker build -t fmobegi/abo-analysis  -f docker/Dockerfile .
-# ## Push
-# #
+# # Build
+# docker build -t fmobegi/abo-analysis  -f docker/Dockerfile .
