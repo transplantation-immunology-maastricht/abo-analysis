@@ -132,28 +132,27 @@ process publish_software {
   publishDir params.outdir, mode: 'copy'
 
   output:
-    path 'software_versions.txt', emit: txt
+    path 'software_mqc_versions.yml', emit: txt
 
   script:
   """
-    echo "\n---------------------------------------" > tmp.txt
-    echo "Software used for this analysis
-    \n---------------------------------------" >> tmp.txt
-    echo "
-    FASTQC: "\$(fastqc --version | sed -e "s/FastQC v//g")"
-    BWA: "\$(bwa 2>&1 | grep -oP 'Version: \\K\\S+')"
-    MINIMAP2: "\$(minimap2 --version)"
-    SAMTOOLS:"\$(samtools --version| grep -E "(^samtool|Using htslib)" | \\
-        sed -e "s/samtools//g" |\\
-        sed -e "s/Using/: using/g" )""  >> tmp.txt
-    echo "
-    MULTIQC: "\$( multiqc --version | sed -e "s/multiqc, version //g")" 
-    " >> tmp.txt
-    echo "\n---------------------------------------" >> tmp.txt
-    sed -i 's/^ *//g'  tmp.txt
-    sed -i '/^\$/d'  tmp.txt
-    cp tmp.txt software_versions.txt
-    rm tmp.txt
+  echo "\n" > tmp.txt
+  echo "
+  Raw reads QC:
+      fastqc: \'"\$(fastqc --version | sed -e "s/FastQC v//g")"\'
+  Mapping and BAM processing:
+      bwa: \'"\$(bwa 2>&1 | grep -oP 'Version: \\K\\S+')"\'
+      minimap2: \'"\$(minimap2 --version)"\'
+      samtools:
+          samtools: \'"\$(samtools --version| grep -E "(^samtool)" | sed -e "s/samtools //g")"\'
+          htslib: \'"\$(samtools --version| grep -E "(^Using htslib)" | sed -e "s/Using htslib //g")"\'
+      "  >> tmp.txt
+  echo "
+  Reporting:
+      multiqc: \'"\$( multiqc --version | sed -e "s/multiqc, version //g")"\'
+  " >> tmp.txt
+  sed -i '/^\$/d'  tmp.txt
+  cp tmp.txt software_mqc_versions.yml
+  rm tmp.txt
   """
 }
-
