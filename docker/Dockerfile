@@ -103,6 +103,11 @@ ARG PATH="$/nextflow_dir/:${PATH}"
 # Run a first invocation of Nextflow so that it loads all its packages and dependencies
 RUN nextflow self-update
 
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+# ENV LC_ALL=en_US.UTF-8 <--- This throws an error both when running locally and on Azure
+ENV TZ=Australia/Perth
+
 # Define Command or Entry Point
 CMD ["/bin/bash"]
 
