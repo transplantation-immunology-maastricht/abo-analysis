@@ -3,18 +3,16 @@
 
 workflow check_env {
     main:
-        fastqc = get_fastqc_version()
-        bwa = get_bwa_version()
-        minimap2 = get_minimap2_version()
-        samtools = get_samtools_version()
-        multiqc = get_multiqc_version()
+    fastqc = get_fastqc_version()
+    bwa = get_bwa_version()
+    samtools = get_samtools_version()
+    multiqc = get_multiqc_version()
     
 	emit:
-        fastqc
-        bwa
-        minimap2
-        samtools
-        multiqc
+    fastqc
+    bwa
+    samtools
+    multiqc
 }
 
 process get_fastqc_version {
@@ -58,27 +56,6 @@ process get_bwa_version {
     fi
 
     VERSION="\$(bwa 2>&1 | grep -oP 'Version: \\K\\S+')"
-    """
-}
-
-process get_minimap2_version {
-    label 'minimap2'
-
-    output:
-    env VERSION
-
-    script:
-    """
-    if ! which minimap2 > /dev/null
-    then
-        echo -e "Could not find the program 'minimap2' in your environment path.\n" 1>&2
-
-        echo "Please install minimap2 before you can continue." 1>&2
-
-        exit 127
-    fi
-
-    VERSION="\$(minimap2 --version)"
     """
 }
 
@@ -132,27 +109,27 @@ process publish_software {
   publishDir params.outdir, mode: 'copy'
 
   output:
-    path 'software_mqc_versions.yml', emit: txt
+    path 'software_versions.txt', emit: txt
 
   script:
   """
-  echo "\n" > tmp.txt
-  echo "
-  Raw reads QC:
-      fastqc: \'"\$(fastqc --version | sed -e "s/FastQC v//g")"\'
-  Mapping and BAM processing:
-      bwa: \'"\$(bwa 2>&1 | grep -oP 'Version: \\K\\S+')"\'
-      minimap2: \'"\$(minimap2 --version)"\'
-      samtools:
-          samtools: \'"\$(samtools --version| grep -E "(^samtool)" | sed -e "s/samtools //g")"\'
-          htslib: \'"\$(samtools --version| grep -E "(^Using htslib)" | sed -e "s/Using htslib //g")"\'
-      "  >> tmp.txt
-  echo "
-  Reporting:
-      multiqc: \'"\$( multiqc --version | sed -e "s/multiqc, version //g")"\'
-  " >> tmp.txt
-  sed -i '/^\$/d'  tmp.txt
-  cp tmp.txt software_mqc_versions.yml
-  rm tmp.txt
+    echo "\n---------------------------------------" > tmp.txt
+    echo "Software used for this analysis
+    \n---------------------------------------" >> tmp.txt
+    echo "
+    FASTQC: "\$(fastqc --version | sed -e "s/FastQC v//g")"
+    BWA: "\$(bwa 2>&1 | grep -oP 'Version: \\K\\S+')"
+    SAMTOOLS:"\$(samtools --version| grep -E "(^samtool|Using htslib)"  | \\
+        sed -e "s/samtools//g" |\\
+        sed -e "s/Using/: using/g" )""  >> tmp.txt
+    echo "
+    MULTIQC: "\$( multiqc --version | sed -e "s/multiqc, version //g")" 
+    " >> tmp.txt
+    echo "\n---------------------------------------" >> tmp.txt
+    sed -i 's/^ *//g'  tmp.txt
+    sed -i '/^\$/d'  tmp.txt
+    cp tmp.txt software_versions.txt
+    rm tmp.txt
   """
 }
+
