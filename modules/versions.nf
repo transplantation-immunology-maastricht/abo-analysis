@@ -3,22 +3,22 @@
 
 workflow check_env {
     main:
-    fastqc = get_fastqc_version()
-    bwa = get_bwa_version()
-    samtools = get_samtools_version()
-    bedtools = get_bedtools_version()
-    multiqc = get_multiqc_version()
+        fastqc = get_fastqc_version()
+        bwa = get_bwa_version()
+        minimap2 = get_minimap2_version()
+        samtools = get_samtools_version()
+        multiqc = get_multiqc_version()
     
 	emit:
-    fastqc
-    bwa
-    samtools
-    bedtools
-    multiqc
+        fastqc
+        bwa
+        minimap2
+        samtools
+        multiqc
 }
 
 process get_fastqc_version {
-    conda "${params.conda_envs_path}/fastqc_env"
+
     label 'fastqc'
 
     output:
@@ -41,7 +41,7 @@ process get_fastqc_version {
 }
 
 process get_bwa_version {
-    conda "${params.conda_envs_path}/samtools_and_bwa_env"
+
     label 'BWA'
 
     output:
@@ -61,8 +61,29 @@ process get_bwa_version {
     """
 }
 
+process get_minimap2_version {
+    label 'minimap2'
+
+    output:
+    env VERSION
+
+    script:
+    """
+    if ! which minimap2 > /dev/null
+    then
+        echo -e "Could not find the program 'minimap2' in your environment path.\n" 1>&2
+
+        echo "Please install minimap2 before you can continue." 1>&2
+
+        exit 127
+    fi
+
+    VERSION="\$(minimap2 --version)"
+    """
+}
+
 process get_samtools_version {
-    conda "${params.conda_envs_path}/samtools_and_bwa_env"
+
     label 'samtools'
 	label 'htslib'
 
@@ -84,30 +105,7 @@ process get_samtools_version {
     """
 }
 
-process get_bedtools_version {
-	conda "${params.conda_envs_path}/bedtools_env"
-    label 'bedtools'
-
-    output:
-    env VERSION
-
-    script:
-    """
-    if ! which bedtools > /dev/null
-    then
-        echo -e "Could not find the program 'bedtools' in your environment path.\n" 1>&2
-
-        echo "Please install bedtools using conda before you can continue." 1>&2
-
-        exit 127
-    fi
-
-    VERSION="\$(bedtools --version)"
-    """
-}
-
 process get_multiqc_version {
-	conda "${params.conda_envs_path}/multiqc_env"
     label 'multiqc'
 
     output:
@@ -129,39 +127,32 @@ process get_multiqc_version {
 }
 
 process publish_software {
-    conda "${params.conda_envs_path}/fastqc_env"
-    tag 'Software_versions'
-    publishDir params.outdir, mode: 'copy'
+  tag 'Software_versions'
 
-    output:
-    path 'software_versions.txt', emit: txt
+  publishDir params.outdir, mode: 'copy'
 
-    script:
-    """
-    echo "\n---------------------------------------" > tmp.txt
-    echo "Software used for this analysis
-    \n---------------------------------------" >> tmp.txt
-    echo "FASTQC: "\$(fastqc --version | sed -e "s/FastQC v//g")"" >> tmp.txt
+  output:
+    path 'software_mqc_versions.yml', emit: txt
 
-    source ${params.conda_envs_path}/etc/profile.d/conda.sh
-    conda activate samtools_and_bwa_env
-    echo "
-    BWA: "\$(bwa 2>&1 | grep -oP 'Version: \\K\\S+')"
-    SAMTOOLS:"\$(samtools --version| grep -E "(^samtool|Using htslib)"  | \\
-        sed -e "s/samtools//g" |\\
-        sed -e "s/Using/: using/g" )""  >> tmp.txt
-
-    conda activate bedtools_env
-    echo "BEDTOOLS: "\$(bedtools --version)"" >>  tmp.txt
-
-    conda activate multiqc_env
-    echo "MULTIQC: "\$( multiqc --version | sed -e "s/multiqc, version //g")"" >> tmp.txt
-
-    echo "\n---------------------------------------" >> tmp.txt
-    sed -i 's/^ *//g'  tmp.txt
-    sed -i '/^\$/d'  tmp.txt
-    cp tmp.txt software_versions.txt
-    rm tmp.txt
-    """
+  script:
+  """
+  echo "\n" > tmp.txt
+  echo "
+  Raw reads QC:
+      fastqc: \'"\$(fastqc --version | sed -e "s/FastQC v//g")"\'
+  Mapping and BAM processing:
+      bwa: \'"\$(bwa 2>&1 | grep -oP 'Version: \\K\\S+')"\'
+      minimap2: \'"\$(minimap2 --version)"\'
+      samtools:
+          samtools: \'"\$(samtools --version| grep -E "(^samtool)" | sed -e "s/samtools //g")"\'
+          htslib: \'"\$(samtools --version| grep -E "(^Using htslib)" | sed -e "s/Using htslib //g")"\'
+      "  >> tmp.txt
+  echo "
+  Reporting:
+      multiqc: \'"\$( multiqc --version | sed -e "s/multiqc, version //g")"\'
+  " >> tmp.txt
+  sed -i '/^\$/d'  tmp.txt
+  cp tmp.txt software_mqc_versions.yml
+  rm tmp.txt
+  """
 }
-

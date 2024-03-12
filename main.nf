@@ -302,7 +302,7 @@ workflow {
 	input = validate_input()
 
 	// Check that all of the software is installed and finds the version info where possible.
-    versions = check_env()    
+    versions = check_env()
     
     // Collect fastq reads for mapping and fastqc 
 	if ( params.reads ) {
@@ -340,6 +340,10 @@ workflow {
 	publish_software()
 	ch_versions = publish_software.out.txt
 
+    // Generate samples mapping for samtools output files
+    // samples_mapping(multiqc_config, params.outdir)
+    // ch_multiqc_config = Channel.empty().mix(samples_mapping.out.yaml.collect{it[1]}.ifEmpty([]))
+
     // MultiQC report
 	if (!params.skip_multiqc){
 		ch_multiqc_files = Channel.empty()
@@ -348,7 +352,7 @@ workflow {
 				 ch_reports.collect(),
 				 ch_multiqc_config)
 
-        run_multiqc(ch_multiqc_files.collect())
+        run_multiqc(ch_multiqc_files.collect(), params.logo)
 		multiqc_report = run_multiqc.out.report.toList()
     }
 

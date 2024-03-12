@@ -24,7 +24,7 @@ SoftwareVersion = "abo-analysis Version 1.0"
 
 def usage():
     print("usage:\n" +
-          "\tThis script is written for python 2.7.11\n" +
+          "\tThis script is written for python 3.11\n" +
           "\tI haven't written the usage tutorial yet.  Oops.  Do this now please.")
 
 

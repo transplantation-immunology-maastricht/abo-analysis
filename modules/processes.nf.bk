@@ -4,6 +4,11 @@ process run_fastqc {
     tag "$name"
     label 'process_medium'
 
+    conda "bioconda::fastqc=0.11.9", useMamba: true
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/fastqc:0.11.9--0' :
+        'biocontainers/fastqc:0.11.9--0' }"
+    
     publishDir "${params.outdir}/reports/fastqc", mode: 'copy'
     cache true
     errorStrategy 'ignore'
@@ -34,6 +39,11 @@ process process_exon6 {
     errorStrategy 'ignore'
     cache true
 
+    conda "bioconda::bwa=0.7.17 bioconda::samtools=1.16.1", useMamba: true
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:219b6c272b25e7e642ae3ff0bf0c5c81a5135ab4-0' :
+        'biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:219b6c272b25e7e642ae3ff0bf0c5c81a5135ab4-0' }"
+ 
     input:
         tuple val(name), path(readsForMapping)
         path(reference)
@@ -53,7 +63,7 @@ process process_exon6 {
             --alleles="${database}" \\
             --output="exon6" \\
             --analysis-type="READS" \\
-            --reads="${readsForMapping}" 2>&1 | tee  ${name}_exon6.log.txt
+            --reads="${readsForMapping}" > ${name}_exon6.log.txt 2>&1
         """
 }
 
@@ -67,6 +77,11 @@ process process_exon7 {
     errorStrategy 'ignore'
     cache true
  
+    conda "bioconda::bwa=0.7.17 bioconda::samtools=1.16.1", useMamba: true
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:219b6c272b25e7e642ae3ff0bf0c5c81a5135ab4-0' :
+        'biocontainers/mulled-v2-fe8faa35dbf6dc65a0f7f5d4ea12e31a79f73e40:219b6c272b25e7e642ae3ff0bf0c5c81a5135ab4-0' }"
+
     input:
         tuple val(name), path(readsForMapping)
         path(reference)
@@ -86,7 +101,7 @@ process process_exon7 {
             --alleles="${database}" \\
             --output="exon7" \\
             --analysis-type="READS" \\
-            --reads="${readsForMapping}" 2>&1 | tee ${name}_exon7.log.txt
+            --reads="${readsForMapping}" > ${name}_exon7.log.txt 2>&1
         """
 }
 
@@ -103,12 +118,10 @@ process compile_results{
     output:
         path("*.txt")
         path("*.xlsx")
-        path("*.csv")
-        path("*.log")
  
     script:
         """
-        python $projectDir/bin/Aggregate_ABO_reports.py $snp_position_files 2>&1 | tee  ABO_results.log
+        python $projectDir/bin/Aggregate_ABO_reports.py $snp_position_files
         """
 }
 
@@ -119,17 +132,20 @@ process run_multiqc {
     publishDir "${params.outdir}/reports/multiqc", mode: 'copy', overwrite: false
     label 'process_single'
 
+    conda "bioconda::multiqc=1.14", useMamba: true
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/multiqc:1.14--pyhdfd78af_0' :
+        'biocontainers/multiqc:1.14--pyhdfd78af_0' }"
+    
     errorStrategy 'ignore'
 
     input:
-        // path outdir
         path multiqc_files
-        path logo
 
     output:
-        path "*_multiqc.html",      emit: report
-        path "*_multiqc_data",      emit: data
-        path "*_multiqc_plots",     optional:true, emit: plots
+        path "*multiqc_report.html", emit: report
+        path "*_data"              , emit: data
+        path "*_plots"             , optional:true, emit: plots
 
     when:
         task.ext.when == null || task.ext.when
@@ -137,10 +153,7 @@ process run_multiqc {
     script:
         def args = task.ext.args ?: ''
         """
-        python $projectDir/bin/generate_samples_mapping.py ${params.outdir} 2>&1 | tee generate_samples_mapping.log 
-        
-        multiqc -ip -f --ignore "alignment.*"  --filename ABO_typing_multiqc $args .
-        rm *.samtools.*
+        multiqc -f $args .
         """
 }
 
@@ -182,3 +195,5 @@ process render_rmarkdown {
             )
         """
 } 
+
+
