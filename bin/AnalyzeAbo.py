@@ -29,10 +29,16 @@ AlleleCutoffAgreementPercent = 95
 
 
 def findPolymorphismsInReads(referenceFileName, readsFileName, outputDirectoryName):
+    """
+    Find polymorphisms in the provided reads.
 
+    Parameters:
+    - reference_file_name (str): The name of the reference file.
+    - reads_file_name (str): The name of the reads file.
+    - output_directory (str): The directory where output files will be saved.
+    """
     print(('Looking for polymorphisms in these reads:' + str(readsFileName)))
-    alignSequencesAgainstReference(
-        referenceFileName, readsFileName, outputDirectoryName)
+    alignSequencesAgainstReference(referenceFileName, readsFileName, outputDirectoryName)
     sequenceStats = analyzeReadAlignment(outputDirectoryName)
     writeReadAlignmentSpreadsheet(outputDirectoryName, sequenceStats)
     findReadPolymorphisms(outputDirectoryName, sequenceStats)
@@ -42,16 +48,31 @@ def findPolymorphismsInReads(referenceFileName, readsFileName, outputDirectoryNa
 
 # Perform BW Alignment.  Align all reads against the Reference.
 
-def batchABOAllelesAgainstReference(referenceFileName, allelesFileName, outputDirectoryName):
 
-    alignSequencesAgainstReference(
-        referenceFileName, allelesFileName, outputDirectoryName)
+def batchABOAllelesAgainstReference(referenceFileName, allelesFileName, outputDirectoryName):
+    """
+    Align ABO alleles against the reference and analyze the alignment.
+
+    Parameters:
+    - reference_file_name (str): The name of the reference file.
+    - alleles_file_name (str): The name of the alleles file.
+    - output_directory (str): The directory where output files will be saved.
+    """
+    alignSequencesAgainstReference(referenceFileName, allelesFileName, outputDirectoryName)
     bloodGroupStats = analyzeAlleleAlignment(outputDirectoryName)
     writeAlleleAlignmentSpreadsheet(outputDirectoryName, bloodGroupStats)
     findInterestingAllelePolymorphisms(outputDirectoryName, bloodGroupStats)
 
 
 def alignSequencesAgainstReference(referenceLocation, alleleFileLocation, outputDirectory):
+    """
+    Align sequences against a reference and analyze the alignment.
+
+    Parameters:
+    - reference_location (str): The location of the reference file.
+    - allele_file_location (str): The location of the allele file.
+    - output_directory (str): The directory where output files will be saved.
+    """
     print('Aligning ABO allele sequences against the reference.')
 
     alignmentSubdir = join(outputDirectory, 'alignment')
@@ -71,12 +92,12 @@ def alignSequencesAgainstReference(referenceLocation, alleleFileLocation, output
         SeqIO.write([refSequence], sequenceWriter, 'fasta')
         sequenceWriter.close()
 
-        # Index The Reference
-        cmd = ("bwa index " + newReferenceLocation)
-        os.system(cmd)
+        # Index The Reference || BWA deprecated !!
+        # cmd = ("bwa index " + newReferenceLocation)
+        # os.system(cmd)
 
     except Exception:
-        print('Exception indexing alignment reference. Is bwa installed? Folder writing permission issue?')
+        print('Exception indexing alignment reference. Is minimap2 installed? Folder writing permission issue?')
         raise
 
     # Part 2 Align
@@ -84,40 +105,67 @@ def alignSequencesAgainstReference(referenceLocation, alleleFileLocation, output
         # align | sam->bam | sort
         tempAlignmentName = join(alignmentSubdir, 'alignment')
         alignmentOutputName = tempAlignmentName + '.bam'
-        bwaMemArgs = "-t 4 -x ont2d"
-        cmd = ("bwa mem " +
-               bwaMemArgs + " " +
+        statOutputName = tempAlignmentName + '.samtools.flagstat'
+        flagstatOutputName = tempAlignmentName + '.samtools.stats'
+        minimap2Args = "-ax map-ont -t 8"
+        
+        ## BWA replaced with minimap2 for long-read alignment
+        # bwaMemArgs = "-t 4 -x ont2d"
+        # cmd = ("bwa mem " +
+        #        bwaMemArgs + " " +
+        #        newReferenceLocation + " " +
+        #        alleleFileLocation +
+        #        " | samtools view  -Sb - | samtools sort -o "
+        #        + alignmentOutputName)
+        cmd = ("minimap2 " +
+               minimap2Args + " " +
                newReferenceLocation + " " +
                alleleFileLocation +
                " | samtools view  -Sb - | samtools sort -o "
                + alignmentOutputName)
         #print ('alignment command:\n' + cmd)
+
         os.system(cmd)
 
     except Exception:
-        print('Exception aligning reads against reference. Are bwa and samtools installed?')
+        print('Exception aligning reads against reference. Are minimap2 and samtools installed?')
         raise
 
-    # Part 3 Index Alignment
+    # Part 3 Index Alignment and flagstat
     try:
         cmd = ("samtools index " + alignmentOutputName)
         #print ('alignment index command:\n' + cmd)
         os.system(cmd)
         #print ('index command:\n' + cmd)
+
+        ## Samtools stats
+        cmd = ("samtools flagstat " + alignmentOutputName + ">" + flagstatOutputName)
+        os.system(cmd)
+        
+        cmd = ("samtools stats " + alignmentOutputName + ">" + statOutputName)
+        os.system(cmd)
+
     except Exception:
-        print('Exception indexing alignment reference. Is bwa installed?')
+        print('Exception indexing alignment reference. Is samtools installed?')
         raise
 
 
-def analyzeReadAlignment(outputDirectory):  # , totalReadCount):
+def analyzeReadAlignment(outputDirectory):
+    """
+    Analyze the read alignment and calculate statistics.
 
+    Parameters:
+    - output_directory (str): The directory where output files will be saved.
+
+    Returns:
+    - list: A list of sequence statistics.
+    """
     print('Parse the alignment, finding allele patterns...')
 
     alignmentSubdir = join(outputDirectory, 'alignment')
 
     # Load up the Alignment Reference file, we'll need it.
-    alignmentReferenceFileName = join(
-        alignmentSubdir, 'AlignmentReference.fasta')
+    alignmentReferenceFileName = join(alignmentSubdir, 'AlignmentReference.fasta')
     alignmentRef = list(SeqIO.parse(alignmentReferenceFileName, 'fasta'))[0]
 
     # Open the bam file
@@ -170,8 +218,7 @@ def analyzeReadAlignment(outputDirectory):  # , totalReadCount):
                 if(pileupRead.is_refskip):
                     print(('This read is a refskip, i dont know what that means:' +
                           pileupRead.alignment.query_name))
-                    raise Exception(
-                        'This read is a refskip, i dont know what that means:' + pileupRead.alignment.query_name)
+                    raise Exception('This read is a refskip, i dont know what that means:' + pileupRead.alignment.query_name)
                 # else this means we have a base aligned at this position for this read.
 
                 else:
@@ -187,8 +234,7 @@ def analyzeReadAlignment(outputDirectory):  # , totalReadCount):
 
             else:
                 print('I did not get an aligned position.')
-                raise Exception(
-                    'I don\'t know what to do with this aligned Sequence.')
+                raise Exception('I don\'t know what to do with this aligned Sequence.')
 
         sequenceStats.append(currentColumnStats)
 
@@ -196,11 +242,18 @@ def analyzeReadAlignment(outputDirectory):  # , totalReadCount):
 
 
 def writeReadAlignmentSpreadsheet(outputDirectory, sequenceStats):
+    """
+    Analyze the read alignment and calculate statistics.
 
+    Parameters:
+    - output_directory (str): The directory where output files will be saved.
+
+    Returns:
+    - list: A list of sequence statistics.
+    """
     print('Writing Read Alignment Stats to output file.')
 
-    alignmentSummaryFile = createOutputFile(
-        join(outputDirectory, 'ReadAlignmentSpreadsheet.csv'))
+    alignmentSummaryFile = createOutputFile(join(outputDirectory, 'ReadAlignmentSpreadsheet.csv'))
     # headers:
     alignmentSummaryFile.write('Ref_Position_1based,Ref_Base'
                                + ',Match_Percent,Mismatch_Percent,Insertion_Percent,Deletion_Percent'
@@ -307,6 +360,14 @@ def findReadPolymorphisms(outputDirectory, sequenceStats):
 
 
 def analyzeChosenPolymorphicPositions(referenceFileName, outputDirectory, sequenceStats):
+    """
+    Analyze chosen polymorphic positions.
+
+    Parameters:
+    - reference_file_name (str): The name of the reference file.
+    - output_directory (str): The directory where output files will be saved.
+    - sequence_stats (list): A list of sequence statistics.
+    """
     print('Analyzing a few chosen polymorphic positions...')
     # Many hard coded values in here.  I think that's okay, these positions are set in stone for modern humans.
 
@@ -325,7 +386,7 @@ def analyzeChosenPolymorphicPositions(referenceFileName, outputDirectory, sequen
         #phenotypeOutputFile.write('Genomic position: 261')
         phenotypeOutputFile.write('\nExon 6 position(1-based): 22\n')
         phenotypeOutputFile.write('G nucleotide: A or B blood type.\n')
-        phenotypeOutputFile.write('Deletion    : O blood type.')
+        phenotypeOutputFile.write('Deletion    : O blood type(O1).')
         printBasePolymorphisms(phenotypeOutputFile, 21,
                                sequenceStats[21])  # pass the 0-based
 
@@ -336,18 +397,29 @@ def analyzeChosenPolymorphicPositions(referenceFileName, outputDirectory, sequen
         phenotypeOutputFile.write('Exon 7:\n')
 
         #phenotypeOutputFile.write('Genomic position: 796')
-        # Think I have this backwards on my poster.  Oops.
         phenotypeOutputFile.write('\nExon 7 position(1-based): 422\n')
         phenotypeOutputFile.write('A nucleotide: B blood type.\n')
         phenotypeOutputFile.write('C nucelotide: A or O blood type.')
         printBasePolymorphisms(phenotypeOutputFile, 421, sequenceStats[421])
+
+        #phenotypeOutputFile.write('Genomic position: 802')
+        phenotypeOutputFile.write('\nExon 7 position(1-based): 428\n')
+        phenotypeOutputFile.write('A nucleotide: O blood type (O2).\n')
+        phenotypeOutputFile.write('G nucelotide: A or B or O blood type.')
+        printBasePolymorphisms(phenotypeOutputFile, 427, sequenceStats[427])
+
 
         #phenotypeOutputFile.write('Genomic position: 803')
         phenotypeOutputFile.write('\nExon 7 position(1-based): 429\n')
         phenotypeOutputFile.write('G nucleotide: A or O blood type.\n')
         phenotypeOutputFile.write('C nucelotide: B blood type.')
         printBasePolymorphisms(phenotypeOutputFile, 428, sequenceStats[428])
-
+        
+        #phenotypeOutputFile.write('Genomic position: 805')
+        phenotypeOutputFile.write('\nExon 7 position(1-based): 431\n')
+        phenotypeOutputFile.write('G nucleotide: O blood type (O3).\n')
+        phenotypeOutputFile.write('T nucelotide: A or B or O blood type.')
+        printBasePolymorphisms(phenotypeOutputFile, 430, sequenceStats[430])
     else:
         phenotypeOutputFile.write(
             'This exon has length:' + str(len(alignmentRef)))
@@ -360,7 +432,16 @@ def analyzeChosenPolymorphicPositions(referenceFileName, outputDirectory, sequen
     # I will have to check if we're working with Ex 6 or 7. Somehow.
 
 
-def analyzeAlleleAlignment(outputDirectory):  # , totalReadCount):
+def analyzeAlleleAlignment(outputDirectory): 
+    """
+    Analyze the alignment of ABO alleles.
+
+    Parameters:
+    - output_directory (str): The directory where output files will be saved.
+
+    Returns:
+    - list: A list of blood group statistics.
+    """
 
     print('Parse the alignment, finding allele patterns...')
 
@@ -438,7 +519,13 @@ def analyzeAlleleAlignment(outputDirectory):  # , totalReadCount):
 
 
 def writeAlleleAlignmentSpreadsheet(outputDirectory, myBloodGroupStats):
+    """
+    Write the allele alignment spreadsheet.
 
+    Parameters:
+    - output_directory (str): The directory where output files will be saved.
+    - blood_group_stats (list): A list of blood group statistics.
+    """
     print('Writing alignment Stats to output file.')
 
     alignmentSummaryFile = createOutputFile(
@@ -499,6 +586,13 @@ def writeAlleleAlignmentSpreadsheet(outputDirectory, myBloodGroupStats):
 
 
 def findInterestingAllelePolymorphisms(outputDirectory, myBloodGroupStats):
+    """
+    Find interesting polymorphisms in the allele sequences.
+
+    Parameters:
+    - output_directory (str): The directory where output files will be saved.
+    - blood_group_stats (list): A list of blood group statistics.
+    """
     print('Searching for the Interesting Polymorphisms.')
 
     # If we match 95% of the time, we can consider it 100%
@@ -608,65 +702,3 @@ def scaleValues(inputValues):
 
     return scaledData
 
-
-"""
-# I didn't have much luck with this strategy, I think I forget this way to do it.
-def compareIndividualABOAllelesToReference(referenceFileName, allelesFileName, outputDirectoryName):
-    print('I load the ABO Reference first.')
-    
-    alignmentInfoOutputFile = createOutputFile(join(outputDirectoryName, 'AlleleAlignments.txt'))
-    alignmentDataSpreadsheet = createOutputFile(join(outputDirectoryName, 'AlleleData.csv'))
-    # Headers on my spreadsheet
-    alignmentDataSpreadsheet.write('AlleleName,AlignmentType,Begin,End,Length\n')
-    
-    for recordIndex, record in loadInputRecords(referenceFileName):
-        referenceSequenceID = str(record.id)
-        referenceSequence = str(record.seq)
-        
-    print('The reference sequence is called:' + str(referenceSequenceID))
-    
-    print('Then load the ABO allele sequences.')
-    alleleSequences = loadInputRecords(allelesFileName)
-    
-    #print ('Guess how many alleles, too late it is this many:' + str(len(alleleSequences)))
-    
-    
-    for index, record in alleleSequences:
-        currentReadID = str(record.id)
-        currentSequence = str(record.seq)
-
-            
-        sequenceLength = len(currentSequence)
-     
-
-        aboPhenotype=getPhenotype(currentReadID)
-        
-        print ('Analyzing allele:' + currentReadID)
-        alignmentInfoOutputFile.write('>' + str(currentReadID) + '\n')
-        alignmentInfoOutputFile.write('Phenotype=' + str(aboPhenotype) + '\n')
-
-        # Align, find interesting polymorphisms.
-        alleleAlignment = PairwiseAlignmentResult(currentReadID, referenceSequence , currentSequence)
-        
-        alignmentInfoOutputFile.write('Alignment Score:' + str(alleleAlignment.alignmentScore) + '\n')
-        alignmentInfoOutputFile.write(str(alleleAlignment.sequence1Aligned) + '\n')
-        alignmentInfoOutputFile.write(str(alleleAlignment.sequence2Aligned) + '\n\n')
-        
-        alignmentDataSpreadsheet.write(str(currentReadID) + ': ' + str(sequenceLength) + '\n')
-        
-        # loop through alignment tuples, print em to a spreadsheet.
-        for alignmentTuple in alleleAlignment.allTuples:
-            regionLength = int(alignmentTuple[2]) - int(alignmentTuple[1]) + 1 
-            if (regionLength > 0):
-                alignmentDataSpreadsheet.write(',' + str(alignmentTuple[0])
-                    + ',' + str(alignmentTuple[1])
-                    + ',' + str(alignmentTuple[2])
-                    + ',' + str(regionLength)             
-                    + '\n')
-        
-
-    alignmentInfoOutputFile.close()
-    alignmentDataSpreadsheet.close()
-    
-    #return sequenceList
-"""

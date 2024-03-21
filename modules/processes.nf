@@ -48,12 +48,12 @@ process process_exon6 {
  
     script:
         """
-        python $projectDir/bin/AnalyzeAbo_Main.py \\
+        python3 $projectDir/bin/AnalyzeAbo_Main.py \\
             --reference="${reference}" \\
             --alleles="${database}" \\
             --output="exon6" \\
             --analysis-type="READS" \\
-            --reads="${readsForMapping}" > ${name}_exon6.log.txt 2>&1
+            --reads="${readsForMapping}" 2>&1 | tee  ${name}_exon6.log.txt
         """
 }
 
@@ -81,12 +81,12 @@ process process_exon7 {
 
     script:
         """
-        python $projectDir/bin/AnalyzeAbo_Main.py \\
+        python3 $projectDir/bin/AnalyzeAbo_Main.py \\
             --reference="${reference}" \\
             --alleles="${database}" \\
             --output="exon7" \\
             --analysis-type="READS" \\
-            --reads="${readsForMapping}" > ${name}_exon7.log.txt 2>&1
+            --reads="${readsForMapping}" 2>&1 | tee ${name}_exon7.log.txt
         """
 }
 
@@ -108,7 +108,7 @@ process compile_results{
  
     script:
         """
-        python $projectDir/bin/Aggregate_ABO_reports.py $snp_position_files > ABO_results.log 2>&1
+        python3 $projectDir/bin/Aggregate_ABO_reports.py $snp_position_files 2>&1 | tee  ABO_results.log
         """
 }
 
@@ -122,12 +122,14 @@ process run_multiqc {
     errorStrategy 'ignore'
 
     input:
+        // path outdir
         path multiqc_files
+        path logo
 
     output:
-        path "*multiqc_report.html", emit: report
-        path "*_data"              , emit: data
-        path "*_plots"             , optional:true, emit: plots
+        path "*_multiqc.html",      emit: report
+        path "*_multiqc_data",      emit: data
+        path "*_multiqc_plots",     optional:true, emit: plots
 
     when:
         task.ext.when == null || task.ext.when
@@ -135,7 +137,10 @@ process run_multiqc {
     script:
         def args = task.ext.args ?: ''
         """
-        multiqc -f $args .
+        python3 $projectDir/bin/generate_samples_mapping.py ${params.outdir} 2>&1 | tee generate_samples_mapping.log 
+        
+        multiqc -ip -f --ignore "alignment.*"  --filename ABO_typing_multiqc $args .
+        rm *.samtools.*
         """
 }
 
