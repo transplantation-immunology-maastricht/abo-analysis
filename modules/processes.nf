@@ -48,7 +48,7 @@ process process_exon6 {
  
     script:
         """
-        python $projectDir/bin/AnalyzeAbo_Main.py \\
+        python3 $projectDir/bin/AnalyzeAbo_Main.py \\
             --reference="${reference}" \\
             --alleles="${database}" \\
             --output="exon6" \\
@@ -81,7 +81,7 @@ process process_exon7 {
 
     script:
         """
-        python $projectDir/bin/AnalyzeAbo_Main.py \\
+        python3 $projectDir/bin/AnalyzeAbo_Main.py \\
             --reference="${reference}" \\
             --alleles="${database}" \\
             --output="exon7" \\
@@ -108,7 +108,7 @@ process compile_results{
  
     script:
         """
-        python $projectDir/bin/Aggregate_ABO_reports.py $snp_position_files 2>&1 | tee  ABO_results.log
+        python3 $projectDir/bin/Aggregate_ABO_reports.py $snp_position_files 2>&1 | tee  ABO_results.log
         """
 }
 
@@ -137,7 +137,7 @@ process run_multiqc {
     script:
         def args = task.ext.args ?: ''
         """
-        python $projectDir/bin/generate_samples_mapping.py ${params.outdir} 2>&1 | tee generate_samples_mapping.log 
+        python3 $projectDir/bin/generate_samples_mapping.py ${params.outdir} 2>&1 | tee generate_samples_mapping.log 
         
         multiqc -ip -f --ignore "alignment.*"  --filename ABO_typing_multiqc $args .
         rm *.samtools.*
