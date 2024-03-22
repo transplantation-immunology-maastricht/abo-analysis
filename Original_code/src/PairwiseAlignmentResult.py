@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 from Bio import pairwise2
 
 
@@ -60,8 +59,7 @@ class PairwiseAlignmentResult():
         mismatch_score = -1
         gap_open = -10
         gap_extend = -1
-        
-        
+                
         # I want a local alignment, so it allows sequences of different lengths.  
         # The method to call depends on how i want to treat mismatches and indels.
         # I found some hints in the man pages for biopython's pairwise2 package
@@ -89,14 +87,13 @@ class PairwiseAlignmentResult():
         #    ,gap_open
         #    ,gap_extend)
         
+        #Let's try a global alignment
         alignments = pairwise2.align.globalms(self.sequence1,self.sequence2
             ,match_score
             ,mismatch_score
             ,gap_open
             ,gap_extend)
-        
-        #Let's try a global alignment
-        
+                
         topAlignment = alignments[0]
         
         self.sequence1Aligned, self.sequence2Aligned, self.alignmentScore, self.indexBegin, self.indexEnd = topAlignment
@@ -110,9 +107,7 @@ class PairwiseAlignmentResult():
         # A "deletion" is a base in sequence 1, missing in sequence 2
         # An indel is both of those.
         self.alignedSectionLength = len(self.sequence1AlignedShort)
-        
-
-        
+                
         # Possible States = 'match' 'mismatch' 'insertion' 'deletion
         # Start at 0, because python enumerate method starts at 0.
         currentState = 'match'

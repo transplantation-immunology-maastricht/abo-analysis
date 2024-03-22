@@ -1,8 +1,8 @@
-#!/usr/bin/env python3
+#!q/usr/bin/env python3
 
 
-from Bio import pairwise2
-
+# from Bio import pairwise2
+from Bio.Align import substitution_matrices, PairwiseAligner
 
 class PairwiseAlignmentResult():
     
@@ -48,60 +48,71 @@ class PairwiseAlignmentResult():
     # But then, why not just do a batch processing?
 
 
-    def alignPairwise(self):      
-        # Alignment Parameters.
-        # A match score is 0.  I chose this so a perfect match is always a score of 0.
-        # I chose to punish gaps more than mismatches.  
-        # Likley there is tuning to be done here.  
-        # I feel like match_score should be zero but I don't get any alignments when that happens.
-        # Maybe the gap penalty should be the same as a mismatch penalty, because errors with repeats are somewhat common.
+    def alignPairwise(self): 
+        """     
+        Alignment Parameters.
+        A match score is 0.  I chose this so a perfect match is always a score of 0.
+        I chose to punish gaps more than mismatches.  
+        Likley, there is fine-tuning to be done here.  
+        I feel like match_score should be zero but I don't get any alignments when that happens.
+        Maybe the gap penalty should be the same as a mismatch penalty, because errors with repeats are somewhat common.
          
+        I want a local alignment, so it allows sequences of different lengths.  
+        The method to call depends on how i want to treat mismatches and indels.
+        I found some hints in the man pages for biopython's pairwise2 package
+        The match parameters are:
+
+        CODE  DESCRIPTION
+        x     No parameters. Identical characters have score of 1, otherwise 0.
+        m     A match score is the score of identical chars, otherwise mismatch
+             score.
+        d     A dictionary returns the score of any pair of characters.
+        c     A callback function returns scores.
+        The gap penalty parameters are:
+        
+        CODE  DESCRIPTION
+        x     No gap penalties.
+        s     Same open and extend gap penalties for both sequences.
+        d     The sequences have different open and extend gap penalties.
+        c     A callback function returns the gap penalties.
+        """
+
         match_score = 1
         mismatch_score = -1
         gap_open = -10
         gap_extend = -1
         
-        
-        # I want a local alignment, so it allows sequences of different lengths.  
-        # The method to call depends on how i want to treat mismatches and indels.
-        # I found some hints in the man pages for biopython's pairwise2 package
-        # The match parameters are:
+        ## ----------------------- OLD ALIGNER -------------------------------------------------
+        # alignments = pairwise2.align.globalms(
+        #     self.sequence1,
+        #     self.sequence2,
+        #     match_score,
+        #     mismatch_score,
+        #     gap_open,
+        #     gap_extend)
 
-        #CODE  DESCRIPTION
-        #x     No parameters. Identical characters have score of 1, otherwise 0.
-        #m     A match score is the score of identical chars, otherwise mismatch
-        #      score.
-        #d     A dictionary returns the score of any pair of characters.
-        #c     A callback function returns scores.
-        #The gap penalty parameters are:
+        ## ----------------------- START CHANGES TO ALIGNER -------------------------------------------------
+        # NEW:  TODO We have to make changes to replace Bio.pairwise2 above with PairwiseAligner!!
+        # It is deprecated and likely to be removed from future releases of Biopython.
+        aligner = PairwiseAligner(
+            mode = 'global',
+            # mode = 'local',
+            substitution_matrix = substitution_matrices.load("BLOSUM62"),
+            open_gap_score = gap_open,
+            extend_gap_score = gap_extend,
+            match_score = match_score,
+            mismatch_score = mismatch_score
+            )
+
+        #Let's try a global alignment with the new aligner :)
+        alignments = aligner.align(self.sequence1, self.sequence2)
         
-        #CODE  DESCRIPTION
-        #x     No gap penalties.
-        #s     Same open and extend gap penalties for both sequences.
-        #d     The sequences have different open and extend gap penalties.
-        #c     A callback function returns the gap penalties.
-        
-        # I chose localms.  So i can specify a mismatch score, and gap scores.
-        # localms(sequenceA, sequenceB, match, mismatch, open, extend) -> alignments        
-        #alignments = pairwise2.alignPairwise.localms(self.sequence1,self.sequence2
-        #    ,match_score
-        #    ,mismatch_score
-        #    ,gap_open
-        #    ,gap_extend)
-        
-        alignments = pairwise2.align.globalms(self.sequence1,self.sequence2
-            ,match_score
-            ,mismatch_score
-            ,gap_open
-            ,gap_extend)
-        
-        #Let's try a global alignment
-        
+        ## ----------------------- END CHANGES TO ALIGNER -------------------------------------------------
+
         topAlignment = alignments[0]
         
         self.sequence1Aligned, self.sequence2Aligned, self.alignmentScore, self.indexBegin, self.indexEnd = topAlignment
                
-        # I really don't need to store this information but why not?  Computer doesn't complain.
         self.sequence1AlignedShort = self.sequence1Aligned[self.indexBegin:self.indexEnd]
         self.sequence2AlignedShort = self.sequence2Aligned[self.indexBegin:self.indexEnd]
         
@@ -110,8 +121,6 @@ class PairwiseAlignmentResult():
         # A "deletion" is a base in sequence 1, missing in sequence 2
         # An indel is both of those.
         self.alignedSectionLength = len(self.sequence1AlignedShort)
-        
-
         
         # Possible States = 'match' 'mismatch' 'insertion' 'deletion
         # Start at 0, because python enumerate method starts at 0.
@@ -156,17 +165,7 @@ class PairwiseAlignmentResult():
                     
         # Guess I need to store the "last" aligned region.
         self.storeAlignmentRegion(currentState, beginIndex, baseIndex-1)
-            
+
+
     def storeAlignmentRegion(self, state, beginIndex, endIndex):
         self.allTuples.append((state, beginIndex, endIndex))
-        #if (state == 'match'):
-        #    self.matchTuples.append((beginIndex, endIndex))
-        #elif (state == 'mismatch'):
-        #    self.mismatchTuples.append((beginIndex, endIndex))
-        #elif (state == 'insertion'):
-        #    self.insertionTuples.append((beginIndex, endIndex))
-        #elif (state == 'deletion'):
-        #    self.deletionTuples.append((beginIndex, endIndex))
-        #else:
-        #    raise Exception('I have a state that I do not know what to do with:' + str(state) + ',' + str(beginIndex) + ',' + str(endIndex))
-            

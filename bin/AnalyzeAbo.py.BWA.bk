@@ -332,7 +332,7 @@ def analyzeChosenPolymorphicPositions(referenceFileName, outputDirectory, sequen
         # TODO: Make up some cutoffs.  If the numbers are close to 50/50, we can guess 2 alleles.
 
     # Exon 7
-    elif(len(alignmentRef) >= 691):
+    elif(len(alignmentRef) == 691):
         phenotypeOutputFile.write('Exon 7:\n')
 
         #phenotypeOutputFile.write('Genomic position: 796')
