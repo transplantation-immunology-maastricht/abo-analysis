@@ -29,5 +29,5 @@ jobs:
           password: ${{ secrets.DOCKER_PW }}
 
       - name: Push Docker image to Docker Hub
-        run: docker push fmobegi/abo-analysis
+        run: docker push fmobegi/abo-analysis:latest
 
