@@ -29,4 +29,4 @@ jobs:
         with:
           push: true
           tags: fmobegi/abo-analysis:latest
-          file: ./abo-analysis/docker/Dockefile
+          file: fmobegi/abo-analysis/docker/Dockefile
