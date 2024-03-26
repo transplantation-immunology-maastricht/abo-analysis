@@ -27,6 +27,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
+          context: .
           push: true
           tags: fmobegi/abo-analysis:latest
-          file: fmobegi/abo-analysis/docker/Dockefile
+          file: ./docker/Dockefile
