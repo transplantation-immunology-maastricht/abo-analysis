@@ -43,5 +43,5 @@ jobs:
           push: true
           tags: |
             fmobegi/abo-analysis:latest
-            #ghcr.io/fmobegi/abo-analysis:latest
+#            ghcr.io/fmobegi/abo-analysis:latest
           file: https://raw.githubusercontent.com/fmobegi/abo-analysis/master/docker/Dockerfile
