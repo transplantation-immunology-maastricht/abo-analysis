@@ -30,4 +30,4 @@ jobs:
           context: .
           push: true
           tags: fmobegi/abo-analysis:latest
-          file: ./docker/Dockefile
+          file: https://raw.githubusercontent.com/fmobegi/abo-analysis/master/docker/Dockerfile
