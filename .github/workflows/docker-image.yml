@@ -17,6 +17,7 @@ jobs:
     name: Build and push docker image to docker hub
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       packages: write
     steps:
       - name: Log in to Docker Hub
