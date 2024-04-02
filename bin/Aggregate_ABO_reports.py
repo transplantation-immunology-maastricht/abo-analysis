@@ -234,49 +234,49 @@ class ABOReportParser:
         nreads_exon7_p431 = df[('Exon7_pos431', '#Reads')]
 
         ## OA COMBINATIONS ---------------------------------------------------------------------------
-        ## combination 1 | O1A --
+        ## combination 1 | AO1 --
         if (type_exon6 == 'O1 and (A or B or O)').all() and \
             (type_exon7_422 == 'A or O').all() and \
                 (type_exon7_428 == 'O and (A or B)').all() and \
                     (type_exon7_429 == 'A or O').all() and \
                         (type_exon7_431 == 'O and (A or B)').all():
             Phenotype = 'A'
-            Genotype = 'OA'
-            ExtendedGenotype = 'O1A'
+            Genotype = 'AO'
+            ExtendedGenotype = 'AO1'
             # Reliability = 'Enter-manually'  
 
-        ## combination 2 | O2A --
+        ## combination 2 | AO2 --
         elif (type_exon6 == 'A or B or O').all() and \
             (type_exon7_422 == 'A or O').all() and \
                 (type_exon7_428 == 'O2 and (O or A or B)').all() and \
                     (type_exon7_429 == 'A or O').all() and \
                         (type_exon7_431 == 'O and (A or B)').all():
             Phenotype = 'A'
-            Genotype = 'OA'
-            ExtendedGenotype = 'O2A'
+            Genotype = 'AO'
+            ExtendedGenotype = 'AO2'
             # Reliability = 'Enter-manually'  
 
-        ## combination 3 | O3A --
+        ## combination 3 | AO3 --
         elif (type_exon6 == 'A or B or O').all() and \
             (type_exon7_422 == 'A or O').all() and \
                 (type_exon7_428 == 'O and (A or B)').all() and \
                     (type_exon7_429 == 'A or O').all() and \
                         (type_exon7_431 == 'O3 and (O or A or B)').all():
             Phenotype = 'A'
-            Genotype = 'OA'
-            ExtendedGenotype = 'O3A'
+            Genotype = 'AO'
+            ExtendedGenotype = 'AO3'
             # Reliability = 'Enter-manually'  
 
         ## OB COMBINATIONS ---------------------------------------------------------------------------
-        ## combination 4 | O1B --
+        ## combination 4 | BO1 --
         elif (type_exon6 == 'O1 and (A or B or O)').all() and \
             (type_exon7_422 == '(A or O) and B').all()  and \
                 (type_exon7_428 == 'O and (A or B)').all() and \
                     (type_exon7_429 == '(A or O) and B').all() and \
                         (type_exon7_431 == 'O and (A or B)').all():
             Phenotype = 'B'
-            Genotype = 'OB'
-            ExtendedGenotype = 'O1B'
+            Genotype = 'BO'
+            ExtendedGenotype = 'BO1'
             # Reliability = 'Enter-manually'  
 
         ## combination 5 | O2B --
@@ -286,19 +286,19 @@ class ABOReportParser:
                     (type_exon7_429 == '(A or O) and B').all() and \
                         (type_exon7_431 == 'O and (A or B)').all():
             Phenotype = 'B'
-            Genotype = 'OB'
+            Genotype = 'BO'
             ExtendedGenotype = 'O2B'
             # Reliability = 'Enter-manually'  
 
-        ## combination 6 | O3A --
+        ## combination 6 | AO3 --
         elif (type_exon6 == 'A or B or O').all() and \
             (type_exon7_422 == '(A or O) and B').all() and \
                 (type_exon7_428 == 'O and (A or B)').all() and \
                     (type_exon7_429 == '(A or O) and B').all() and \
                         (type_exon7_431 == 'O3 and (O or A or B)').all():
             Phenotype = 'B'
-            Genotype = 'OB'
-            ExtendedGenotype = 'O3B'
+            Genotype = 'BO'
+            ExtendedGenotype = 'BO3'
             # Reliability = 'Enter-manually' 
 
         ## OO COMBINATIONS  ---------------------------------------------------------------------------
@@ -506,7 +506,7 @@ class ABOReportParser:
 
     def merge_dataframes(self):
         final_df = pd.concat(self.results)
-        final_df = final_df.sort_values(('', 'Barcode'))
+        final_df = final_df.sort_values(by = [('', 'Sequencing_ID')])
         return final_df
 
 
@@ -585,19 +585,23 @@ class ABOReportParser:
         self.df_for_lis_soft = pd.DataFrame()
         self.df_for_lis_soft["Sample ID"] = final_df["Sequencing_ID"]
         self.df_for_lis_soft["Shipment Date"] = ""
-        # self.df_for_lis_soft["ABO Geno Type1"] = final_df["Genotype"].str[0]
-        # self.df_for_lis_soft["ABO Geno Type2"] = final_df["Genotype"].str[1]
-        # Only process if not Unknown
-        self.df_for_lis_soft["ABO Geno Type1"], self.df_for_lis_soft["ABO Geno Type2"] = (
-            (final_df["Genotype"].str[0], final_df["Genotype"].str[1]) 
-            if 'Genotype' in final_df.columns and (final_df['Genotype'] != 'Unknown').all()
-            else ("", "")
-        )
+
+        # Only process if "Genotype" column exists and all values are not 'Unknown' or blank
+        if "Genotype" in final_df.columns and not final_df["Genotype"].isnull().all() and not (final_df["Genotype"] == 'Unknown').all():
+            valid_genotype_mask = (final_df["Genotype"] != 'Unknown') & final_df["Genotype"].notnull()
+            self.df_for_lis_soft.loc[valid_genotype_mask, "ABO Geno Type1"] = final_df.loc[valid_genotype_mask, "Genotype"].str[0]
+            self.df_for_lis_soft.loc[valid_genotype_mask, "ABO Geno Type2"] = final_df.loc[valid_genotype_mask, "Genotype"].str[1]
+        
+        else:
+            self.df_for_lis_soft["ABO Geno Type1"] = ""
+            self.df_for_lis_soft["ABO Geno Type2"] = ""
+        
         self.df_for_lis_soft["ABO Pheno Type"] = final_df["Phenotype"]
         self.df_for_lis_soft["RH"] = ""
         self.df_for_lis_soft["Blood Type"] = final_df["Phenotype"]
         self.df_for_lis_soft["ABORH Comments"] = ""
-        self.df_for_lis_soft.to_csv("./final_export.csv", index = False, encoding = "utf-8")
+        self.df_for_lis_soft.drop_duplicates(inplace=True)
+        self.df_for_lis_soft.to_csv("./final_export.csv", index=False, encoding="utf-8")
 
 
     def run(self):

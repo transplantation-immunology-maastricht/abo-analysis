@@ -8,7 +8,7 @@ See [https://ftp.ncbi.nlm.nih.gov/pub/mhc/rbc/Final%20Archive/Excel_and_PowerPoi
 
 # Required tools
 
-The pipeline makes use of the following dependencies:
+The pipeline makes use of the following core dependencies:
 
 - bioconda::fastqc=0.12.1
 - bioconda::bwa=0.7.17
@@ -19,13 +19,17 @@ The pipeline makes use of the following dependencies:
 - python=3.10
 - pip
 - pip:
-  - numpy==1.26.4
-  - Bio==1.6.2
-  - openpyxl==3.1.2
-  - pandas==2.2.0
-  - pysam==0.22.0
-  - matplotlib==3.8.2
-  - xlsxwriter==3.1.9
+  - numpy>=1.26.0
+  - Bio>=1.6.0
+  - biopython>=1.8o
+  - openpyxl>=3.1.0
+  - pandas>=2.2.0
+  - pysam>=0.22.0
+  - matplotlib>=3.8.0
+  - XlsxWriter>=3.2.0
+  - multiqc>=1.18
+
+A complete list of dependencies is found in the assets folder `assets/conda.yml`.
 
 # Testing without `nextflow`
 
@@ -33,18 +37,18 @@ The pipeline can be tested of single input file by cloning this repo and install
 
 ```python
 python bin/AnalyzeAbo_Main.py  \
- --reference="assets/A1_01_01_1_reference_Exon6.fasta" \
- --alleles="assets/ABO_Database.fasta" \
- --output="SampleName/exon6" \
- --analysis-type="READS" \
- --reads="SampleName.fastq" \
+  --reference="assets/A1_01_01_1_reference_Exon6.fasta" \
+  --alleles="assets/ABO_Database.fasta" \
+  --output="SampleName/exon6" \
+  --analysis-type="READS" \
+  --reads="SampleName.fastq" \
  
  python bin/AnalyzeAbo_Main.py  \
- --reference="assets/reads_bc51/A1_01_01_1_reference_Exon7.fasta" \
- --alleles="assets/input/ABO_Database.fasta" \
- --output="SampleName/exon7" \
- --analysis-type="READS" \
- --reads="SampleName.fastq"
+  --reference="assets/reads_bc51/A1_01_01_1_reference_Exon7.fasta" \
+  --alleles="assets/input/ABO_Database.fasta" \
+  --output="SampleName/exon7" \
+  --analysis-type="READS" \
+  --reads="SampleName.fastq"
 ```
 
 Looping through a couple of samples with the above command will generate the following outputs:
@@ -189,4 +193,4 @@ To run without the workload manager but with a specific containerization, use:
 └── workflow.oncomplete.txt
 ```
 
-Feel free to reach out if you need any support getting this tool running or with suggestions for improvement.
+Feel free to raise an issue or reach out if you need any support getting this tool running, or with suggestions for improvement.
