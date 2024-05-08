@@ -151,7 +151,21 @@ source {path_to_anaconda}/anaconda3/etc/profile.d/conda.sh
 ## Some housekeeping for general usage
 
 This pipeline was optimized to run our in-house samples whose naming convention may be different from other users.
-The in-house sequencing naming convention starts with the alphabetical initials `IMM` (result) or `INGS` (+ve control) or `NGS` (-ve control), followed by a dash `-` and a 2-digit year code `##`, followed by another dash `-` and a numeric sample id `####+` for the sequencing run, followed by an `underscore (_)` and the barcode number `barcode##`. Spliting of these sequencing IDs into `samplenale` and `barcode##`, required to aggregate the results, is performed by the `process_files` function in the `Aggregate_ABO_reports.py` script.
+The in-house sequencing naming convention starts with the alphabetical initials `IMM` (result) or `INGSNEG` (negative control) or `NGSPOS` (positive control), followed by a dash `-` and a 2-digit year code `##`, followed by another dash `-` and a numeric sample id `####+` for the sequencing run, followed by an `underscore (_)` and the barcode number `barcode##`. SEE example below.
+
+```yaml
+IMM-23-971_barcode04.fastq
+IMM-23-972_barcode03.fastq
+IMM-23-973_barcode02.fastq
+IMM-23-974_barcode01.fastq
+IMM-23-999_barcode28.fastq
+INGSNEG_barcode31.fastq
+INGSNEG_barcode57.fastq
+INGSNEG_barcode81.fastq
+INGSPOS_barcode01.fastq
+NGSPOS_barcode13.fastq
+```
+Spliting of these sequencing IDs into `samplenale` and `barcode##`, required to aggregate the results, is performed by the `process_files` function in the `Aggregate_ABO_reports.py` script.
 This function needs to be modified to suit individual needs based on the sequencing IDs in your sequencing core.
 
 This `pipeline` can also process `short-reads` from both `Illumina` and `IonTorrent` platforms as long as the paired reads are interleaved into a single file per sample and the naming convention follows the `IMM-##-####+_barcode##` convention.
