@@ -151,10 +151,12 @@ To run without the workload manager but with a specific containerization, use:
 - `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -with-docker fmobegi/abo-analysis` or
   `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -profile docker`
 
-# Renaming samples
-
+# Renaming samples (OPTIONAL)
+**NB: This step is on by default. Users must explicitly disable it in the config file by setting** `--skip_renaming true`
 The code by default renames samples using a tab file with `sequencingID` and `sampleName` (see `nextflow.config` file under `$params.renaming_file`).
 This option is controlled by the parameter `$params.skip_renaming` and can be overridden via the commandline using option `--skip_renaming true` to skip the process.
+
+  
 
 # Results from the `Nextflow` pipeline will look something like this
 
