@@ -152,7 +152,7 @@ To run without the workload manager but with a specific containerization, use:
   `nextflow run abo-analysis/main.nf -resume --outdir "$PWD/230128R_ABO_results" -profile docker`
 
 # Renaming samples (OPTIONAL)
-**NB: This step is on by default. Users must explicitly disable it in the config file by setting** `--skip_renaming true`
+**NB: This step is on by default. If not needed, users must explicitly disable it in the config file by setting** `--skip_renaming true`
 
 The code by default renames samples using a tab file with `sequencingID` and `sampleName` (see `nextflow.config` file under `$params.renaming_file`).
 In our use case, this file is exported directly from LIS Soft into an excel file whose "Acc#" and "Patient Name" columns (A,C) are used for renaming purposes. 
