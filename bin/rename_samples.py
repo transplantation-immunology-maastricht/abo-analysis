@@ -61,8 +61,19 @@ def main(final_export_file, deobfuscation):
     final_export_grid_noAccesion.drop('SequencingAcc#', axis=1, inplace=True)
 
     # Write to file
-    final_export_grid.to_csv("MatchPointExport_with_sequencingAcc.txt", index=False)
-    final_export_grid_noAccesion.to_csv("MatchPointExport.txt", index=False)
+    final_export_grid.to_csv(
+        "MatchPointExport_with_sequencingAcc.txt", 
+        index=False, 
+        encoding='utf-8', 
+        line_terminator='\n'
+    )
+    
+    final_export_grid_noAccesion.to_csv(
+        "MatchPointExport.txt", 
+        index=False, 
+        encoding='utf-8', 
+        line_terminator='\n'
+    )
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
