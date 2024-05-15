@@ -28,6 +28,7 @@ include {
 	process_exon7;
 	run_multiqc;
     compile_results;
+    rename_samples;
 } from './modules/processes'
 
 // MultiQC reporting
@@ -36,6 +37,9 @@ def multiqc_report = []
 // Chanel for multiqc config/yaml files 
 ch_multiqc_config = Channel.fromPath(file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true))
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+
+// // Chanel for sample deobfuscation
+// ch_deobfuscation = Channel.fromPath(file(params.renaming_file, checkIfExists: true))
 
 def helpMessage() {
     log.info """
@@ -334,11 +338,24 @@ workflow {
 
 	// Create final results
     // ch_SNP_reports.collect().view() // check chanel files
-    compile_results(params.outdir, ch_SNP_reports.collect())
+    compile_ch = compile_results(params.outdir, ch_SNP_reports.collect())
+
+    // chanel with final export file
+    ch_export_file = Channel.empty()
+                        .mix(compile_ch.final_export.collect().ifEmpty([]))
+    
+    // Rename order # with grid number if samples deobfuscation file in provided
+    if (!params.skip_renaming) {
+        rename_samples(params.renaming_file, ch_export_file.collect())
+    }
 
   	// Publish software versions to text
 	publish_software()
 	ch_versions = publish_software.out.txt
+
+    // Generate samples mapping for samtools output files
+    // samples_mapping(multiqc_config, params.outdir)
+    // ch_multiqc_config = Channel.empty().mix(samples_mapping.out.yaml.collect{it[1]}.ifEmpty([]))
 
     // MultiQC report
 	if (!params.skip_multiqc){
@@ -348,7 +365,7 @@ workflow {
 				 ch_reports.collect(),
 				 ch_multiqc_config)
 
-        run_multiqc(ch_multiqc_files.collect())
+        run_multiqc(ch_multiqc_files.collect(), params.logo)
 		multiqc_report = run_multiqc.out.report.toList()
     }
 
