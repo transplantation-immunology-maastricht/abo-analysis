@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+__author__ = "Benedict Matern, Fredrick Mobegi"
+__copyright__ = "Copyright 2024, ABO blood group typing using third-generation sequencing (TGS) technology"
+__credits__ = ["Fredrick Mobegi", "Benedict Matern", "Mathijs Groeneweg"]
+__license__ = "GPL"
+__version__ = "0.2.0"
+__maintainer__ = "Fredrick Mobegi"
+__email__ = "fredrick.mobegi@health.wa.gov.au"
+__status__ = "Development"
 
 # This file is part of abo-analysis.
 #
@@ -162,21 +172,61 @@ class BloodGroupColumn:
         # return self.aCount + self.cCount + self.gCount + self.tCount + self.delCount
         return self.matchCount + self.mismatchCount + self.inCount + self.delCount
 
+    # def getMatchPercent(self):
+    #     #totalDataCount = self.matchCount + self.mismatchCount + self.inCount + self.delCount
+    #     return ((100.0 * self.matchCount)/self.getMappedReadCount())
+
+    # def getMismatchPercent(self):
+    #     #totalDataCount = self.matchCount + self.mismatchCount + self.inCount + self.delCount
+    #     return ((100.0 * self.mismatchCount)/self.getMappedReadCount())
+
+    # def getInsertionPercent(self):
+    #     #totalDataCount = self.matchCount + self.mismatchCount + self.inCount + self.delCount
+    #     return ((100.0 * self.inCount)/self.getMappedReadCount())
+
+    # def getDeletionPercent(self):
+    #     #totalDataCount = self.matchCount + self.mismatchCount + self.inCount + self.delCount
+    #     return ((100.0 * self.delCount)/self.getMappedReadCount())
     def getMatchPercent(self):
-        #totalDataCount = self.matchCount + self.mismatchCount + self.inCount + self.delCount
-        return ((100.0 * self.matchCount)/self.getMappedReadCount())
+        try:
+            mapped_count = self.getMappedReadCount()
+            if mapped_count > 0:
+                return ((100.0 * self.matchCount) / mapped_count)
+            else:
+                return 0.0  # Or any other appropriate value when count is zero
+        except ZeroDivisionError:
+            return 0.0
 
     def getMismatchPercent(self):
-        #totalDataCount = self.matchCount + self.mismatchCount + self.inCount + self.delCount
-        return ((100.0 * self.mismatchCount)/self.getMappedReadCount())
+        try:
+            mapped_count = self.getMappedReadCount()
+            if mapped_count > 0:
+                return ((100.0 * self.mismatchCount) / mapped_count)
+            else:
+                return 0.0
+        except ZeroDivisionError:
+            return 0.0
 
     def getInsertionPercent(self):
-        #totalDataCount = self.matchCount + self.mismatchCount + self.inCount + self.delCount
-        return ((100.0 * self.inCount)/self.getMappedReadCount())
+        try:
+            mapped_count = self.getMappedReadCount()
+            if mapped_count > 0:
+                return ((100.0 * self.inCount) / mapped_count)
+            else:
+                return 0.0
+        except ZeroDivisionError:
+            return 0.0
 
     def getDeletionPercent(self):
-        #totalDataCount = self.matchCount + self.mismatchCount + self.inCount + self.delCount
-        return ((100.0 * self.delCount)/self.getMappedReadCount())
+        try:
+            mapped_count = self.getMappedReadCount()
+            if mapped_count > 0:
+                return ((100.0 * self.delCount) / mapped_count)
+            else:
+                return 0.0
+        except ZeroDivisionError:
+            return 0.0
+
 
     def deleteBase(self):
         self.delCount += 1
