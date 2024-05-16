@@ -3,7 +3,7 @@
 import pandas as pd
 import sys
 import re
-
+from datetime import datetime
 
 def main(final_export_file, deobfuscation):
     """
@@ -62,16 +62,16 @@ def main(final_export_file, deobfuscation):
 
     # Write to file
     final_export_grid.to_csv(
-        "MatchPointExport_with_sequencingAcc.txt", 
-        index=False, 
-        encoding='utf-8', 
+        "MatchPointExport_with_sequencingAcc_" + datetime.now().strftime("%Y_%m_%d-%I_%M") + ".txt",
+        index=False,
+        encoding='utf-8',
         line_terminator='\n'
     )
     
     final_export_grid_noAccesion.to_csv(
-        "MatchPointExport.txt", 
-        index=False, 
-        encoding='utf-8', 
+        "MatchPointExport_" + datetime.now().strftime("%Y_%m_%d-%I_%M") + ".txt",
+        index=False,
+        encoding='utf-8',
         line_terminator='\n'
     )
 
