@@ -124,7 +124,7 @@ process rename_samples {
     path(deobfuscation)
 
     output:
-    path "MatchPointExport.txt"
+    path "*.txt"
 
     script:
     """
