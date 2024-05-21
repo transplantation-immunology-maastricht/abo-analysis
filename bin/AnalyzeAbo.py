@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+__author__ = "Benedict Matern, Fredrick Mobegi"
+__copyright__ = "Copyright 2024, ABO blood group typing using third-generation sequencing (TGS) technology"
+__credits__ = ["Fredrick Mobegi", "Benedict Matern", "Mathijs Groeneweg"]
+__license__ = "GPL"
+__version__ = "0.2.0"
+__maintainer__ = "Fredrick Mobegi"
+__email__ = "fredrick.mobegi@health.wa.gov.au"
+__status__ = "Development"
 
 # This file is part of abo-analysis.
 #

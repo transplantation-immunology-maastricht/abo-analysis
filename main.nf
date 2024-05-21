@@ -28,6 +28,7 @@ include {
 	process_exon7;
 	run_multiqc;
     compile_results;
+    rename_samples;
 } from './modules/processes'
 
 // MultiQC reporting
@@ -36,6 +37,9 @@ def multiqc_report = []
 // Chanel for multiqc config/yaml files 
 ch_multiqc_config = Channel.fromPath(file("$projectDir/assets/multiqc_config.yaml", checkIfExists: true))
 ch_multiqc_custom_config = params.multiqc_config ? Channel.fromPath(params.multiqc_config) : Channel.empty()
+
+// // Chanel for sample deobfuscation
+// ch_deobfuscation = Channel.fromPath(file(params.renaming_file, checkIfExists: true))
 
 def helpMessage() {
     log.info """
@@ -334,7 +338,16 @@ workflow {
 
 	// Create final results
     // ch_SNP_reports.collect().view() // check chanel files
-    compile_results(params.outdir, ch_SNP_reports.collect())
+    compile_ch = compile_results(params.outdir, ch_SNP_reports.collect())
+
+    // chanel with final export file
+    ch_export_file = Channel.empty()
+                        .mix(compile_ch.final_export.collect().ifEmpty([]))
+    
+    // Rename order # with grid number if samples deobfuscation file in provided
+    if (!params.skip_renaming) {
+        rename_samples(ch_export_file.collect(), params.renaming_file)
+    }
 
   	// Publish software versions to text
 	publish_software()

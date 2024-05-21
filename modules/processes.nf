@@ -105,11 +105,33 @@ process compile_results{
         path("*.xlsx")
         path("*.csv")
         path("*.log")
+        path("final_export.csv"),  emit: final_export
  
     script:
         """
         python3 $projectDir/bin/Aggregate_ABO_reports.py $snp_position_files 2>&1 | tee  ABO_results.log
         """
+}
+
+
+// Reformat samples 
+process rename_samples {
+    tag "Handle Final Export"
+    publishDir "${params.outdir}", mode: 'copy'
+
+    input:
+    path(deobfuscation)
+    path(final_export_file)
+    
+
+    output:
+    path "MatchPointExport.txt"
+    path "MatchPointExport_with_sequencingAcc.txt"
+
+    script:
+    """
+    python3 $projectDir/bin/rename_samples.py ${final_export_file} ${deobfuscation}
+    """
 }
 
 
