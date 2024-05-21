@@ -120,11 +120,13 @@ process rename_samples {
     publishDir "${params.outdir}", mode: 'copy'
 
     input:
-    path(final_export_file)
     path(deobfuscation)
+    path(final_export_file)
+    
 
     output:
-    path "*.txt"
+    path "MatchPointExport.txt"
+    path "MatchPointExport_with_sequencingAcc.txt"
 
     script:
     """
