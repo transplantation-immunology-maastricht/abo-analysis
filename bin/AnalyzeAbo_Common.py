@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+__author__ = "Benedict Matern, Fredrick Mobegi"
+__copyright__ = "Copyright 2024, ABO blood group typing using third-generation sequencing (TGS) technology"
+__credits__ = ["Fredrick Mobegi", "Benedict Matern", "Mathijs Groeneweg"]
+__license__ = "GPL"
+__version__ = "0.2.0"
+__maintainer__ = "Fredrick Mobegi"
+__email__ = "fredrick.mobegi@health.wa.gov.au"
+__status__ = "Development"
 
 # This file is part of abo-analysis.
 #
@@ -17,7 +27,8 @@
 
 
 import os
-#from Bio.Seq import Seq
+
+# from Bio.Seq import Seq
 from Bio import SeqIO
 from os.path import split
 
@@ -27,14 +38,14 @@ def createOutputFile(outputfileName):
     tempDir, tempFilename = split(outputfileName)
     if not os.path.isdir(tempDir):
         os.makedirs(tempDir)
-    resultsOutput = open(outputfileName, 'w')
+    resultsOutput = open(outputfileName, "w")
     return resultsOutput
 
 
 def loadInputRecords(recordFileName):
-    if (".fasta" == recordFileName[-6:] or ".fa" == recordFileName[-3:]):
+    if ".fasta" == recordFileName[-6:] or ".fa" == recordFileName[-3:]:
         FileOutputFormat = "fasta"
-    elif (".fastq" == recordFileName[-6:] or ".fq" == recordFileName[-3:]):
+    elif ".fastq" == recordFileName[-6:] or ".fq" == recordFileName[-3:]:
         FileOutputFormat = "fastq"
     else:
         FileOutputFormat = "UnknownFormat"
